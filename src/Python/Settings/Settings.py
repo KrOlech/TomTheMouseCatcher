@@ -2,7 +2,12 @@ import nidaqmx
 
 FrameWidth = 1920
 FrameHeigth = 1080
-CamNr = 0
+
+# if provided int number it will connect to usb camera
+# if provided a path to recording it will use that recording instead
+#CamNr = 0
+CamNr = r"C:\Users\Zenbook\Downloads\m16.avi"
+
 minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse
 lightFlash = False  # decision whether light flashes or not
