@@ -27,7 +27,7 @@ class MainLoop(MainLoopAbstract, ABC):
         time.sleep(2)
         self.checkActivation()
 
-        while True:
+        for _ in iter(int, 1):
 
             time.sleep(Settings.LoopTime)
             self.checkActivation()
