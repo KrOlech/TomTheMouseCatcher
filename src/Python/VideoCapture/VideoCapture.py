@@ -27,7 +27,7 @@ class VideoCapture:
         self.finishFlag = finishFlag
         self.which_logic_Set = which_logic_Set
 
-        cap = cv2.VideoCapture(Settings.CamNr)#todo mock of camera
+        cap = cv2.VideoCapture(Settings.CamNr)  # todo mock of camera
 
         self.cap = cap
 
@@ -36,7 +36,7 @@ class VideoCapture:
         frames = []
         offset_nr = 90
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        #cv2.startWindowThread()
+        # cv2.startWindowThread()
         cv2.namedWindow("output", cv2.WND_PROP_VISIBLE)
         # fourcc = cv2.cv.CV_FOURCC(*'XVID')
         self.SetCapture()
@@ -135,7 +135,7 @@ class VideoCapture:
                 break
         # When everything done, release the capture
         self.RelaseCapture()
-		
+
     def RelaseCapture(self):
         self.cap.release()
         cv2.destroyAllWindows()

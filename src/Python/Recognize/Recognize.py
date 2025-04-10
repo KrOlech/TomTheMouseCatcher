@@ -8,7 +8,7 @@ import csv
 import os
 from src.Python.Settings import Settings
 from src.Python.Zones.Zones import Zones
-from src.Python.MainLoop.MainLoop_Forced2 import MainLoop
+from src.Python.MainLoop.MainLoop import MainLoop
 
 
 class Recognize(Zones):

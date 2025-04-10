@@ -4,7 +4,7 @@ import numpy
 
 from src.Python.Settings import Settings
 from src.Python.Doors.DoorControl import DoorControl
-from src.Python.MainLoop.MainLoop_Forced2 import MainLoop  # Line to choose the logic: from (insert logic name) import MainLoop
+from src.Python.MainLoop.MainLoop import MainLoop  # Line to choose the logic: from (insert logic name) import MainLoop
 from src.Python.VideoCapture.VideoCapture import VideoCapture
 from src.Python.Zones.Zones import Zones
 
@@ -26,7 +26,6 @@ class EMaze(MainLoop):
         self.zone_names = Zones(self.which_logic_Set, self.trial_nr).get_zone_names()
 
         self.door_names = DoorControl.getDoorNames()
-
         e = multiprocessing.Event()
 
         self.finishFlag = multiprocessing.Event()

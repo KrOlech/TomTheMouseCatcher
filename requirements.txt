@@ -1,0 +1,4 @@
+nidaqmx~=1.0.2
+numpy~=1.26.4
+opencv-python~=4.11.0.86 #2.4.0.1 for 1.0
+pygame~=2.6.1
