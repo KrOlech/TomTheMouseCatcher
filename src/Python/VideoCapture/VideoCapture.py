@@ -230,7 +230,7 @@ class VideoCapture:
         cv2.destroyAllWindows()
 
     def setCapture(self):
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, Settings.FrameWidth)  # todo get screen width
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, Settings.FrameWidth)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, Settings.FrameHeigth)
         self.ret_val, self.cap_for_exposure = self.cap.read()
 
