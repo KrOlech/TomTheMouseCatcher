@@ -1,3 +1,4 @@
+import os
 import time
 from abc import abstractmethod, ABC
 import pygame
@@ -55,7 +56,8 @@ class MainLoopAbstract(ABC):
     def log_data_csv(zone_name, duration):
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")  # Get actual time
         log_entry = [timestamp, zone_name, round(duration, 2)]
-        with open(".\\data\\zone_activity_log.csv", mode="a", newline="") as file:
+
+        with open(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\zone_activity_log.csv", mode="a", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(log_entry)
 

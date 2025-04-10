@@ -1,14 +1,13 @@
-import numpy as np
-import multiprocessing
-import cv2
-from datetime import datetime
-import time
-import numpy
 import csv
 import os
+import time
+from datetime import datetime
+
+import numpy
+
+from src.Python.MainLoop.MainLoop import MainLoop
 from src.Python.Settings import Settings
 from src.Python.Zones.Zones import Zones
-from src.Python.MainLoop.MainLoop import MainLoop
 
 
 class Recognize(Zones):
@@ -112,7 +111,7 @@ class Recognize(Zones):
         print("NR IN ZONES RIGHT", self.number_in_zones_R)
         print("TIMES IN ZONES RIGHT", self.time_in_zones_R)
         now = datetime.now()
-        file_name = now.strftime(".\\data\\zones%Y%m%d_%H_%M_%S") + ".csv"
+        file_name = now.strftime(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\zones%Y%m%d_%H_%M_%S") + ".csv"
         fh = open(file_name, "w")
         csv_writer = csv.writer(fh)
         for k in self.time_in_zones.keys():
