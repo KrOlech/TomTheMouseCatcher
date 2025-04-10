@@ -1,16 +1,9 @@
-import numpy as np
-import multiprocessing
-import cv2
-from datetime import datetime
 import time
-import numpy
-import os
-from src.Python.Settings import Settings
+
 import nidaqmx
-from nidaqmx.constants import LineGrouping
-from nidaqmx.constants import Edge
-from nidaqmx.constants import AcquisitionType
-from nidaqmx.constants import TerminalConfiguration as TerminalConfiguration
+import numpy as np
+
+from src.Python.Settings import Settings
 
 
 class DoorControl:
@@ -34,10 +27,10 @@ class DoorControl:
 
     @staticmethod
     def getDoorIndex(name, door_names):
-        return (door_names.index(name))
+        return door_names.index(name)
 
     def _getDoorIndex(self, name):
-        return (DoorControl.getDoorIndex(name, self.door_names))
+        return DoorControl.getDoorIndex(name, self.door_names)
 
     def setLamps(self):
         self.task1 = nidaqmx.Task()
