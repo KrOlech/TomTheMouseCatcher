@@ -5,6 +5,7 @@ import numpy
 from src.Python.Settings import Settings
 from src.Python.Doors.DoorControl import DoorControl
 from src.Python.MainLoop.MainLoop import MainLoop  # Line to choose the logic: from (insert logic name) import MainLoop
+from src.Python.Setup.Setup import setUp
 from src.Python.VideoCapture.VideoCapture import VideoCapture
 from src.Python.Zones.Zones import Zones
 
@@ -85,5 +86,6 @@ class EMaze(MainLoop):
 
 
 if __name__ == '__main__':
+    setUp()
     eMaze = EMaze()
     eMaze.mainLoop()

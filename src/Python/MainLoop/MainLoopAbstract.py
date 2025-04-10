@@ -8,9 +8,9 @@ from src.Python.Settings import Settings
 
 try:
     pygame.mixer.init()
-    expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
-    sound2 = pygame.mixer.Sound(expectedLocation + r"\7k_hz.wav")
-    sound1 = pygame.mixer.Sound(expectedLocation + r"\14k_hz.wav")
+
+    sound2 = pygame.mixer.Sound(Settings.expectedLocation + r"\7k_hz.wav")
+    sound1 = pygame.mixer.Sound(Settings.expectedLocation + r"\14k_hz.wav")
     sound1.set_volume(Settings.volume2)
     sound2.set_volume(Settings.volume1)
 except FileNotFoundError as e:
