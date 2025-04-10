@@ -8,8 +8,9 @@ from src.Python.Settings import Settings
 
 try:
     pygame.mixer.init()
-    sound2 = pygame.mixer.Sound('C:\\Users\\kradwanska\\Desktop\\7k_hz.wav')
-    sound1 = pygame.mixer.Sound('C:\\Users\\kradwanska\\Desktop\\14k_hz.wav')
+    expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
+    sound2 = pygame.mixer.Sound(expectedLocation + r"\7k_hz.wav")
+    sound1 = pygame.mixer.Sound(expectedLocation + r"\14k_hz.wav")
     sound1.set_volume(Settings.volume2)
     sound2.set_volume(Settings.volume1)
 except FileNotFoundError as e:
@@ -57,7 +58,8 @@ class MainLoopAbstract(ABC):
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")  # Get actual time
         log_entry = [timestamp, zone_name, round(duration, 2)]
 
-        with open(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\zone_activity_log.csv", mode="a", newline="") as file:
+        with open(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\zone_activity_log.csv", mode="a",
+                  newline="") as file:
             writer = csv.writer(file)
             writer.writerow(log_entry)
 
