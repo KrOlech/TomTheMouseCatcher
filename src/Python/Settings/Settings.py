@@ -167,4 +167,5 @@ LogicList = [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0
 # LogicList = [0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0] # - 50 trial version randomised 5
 
 expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
-logLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\data"
+dataLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\data"
+logLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\log"

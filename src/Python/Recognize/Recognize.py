@@ -30,7 +30,7 @@ class Recognize(Zones):
 
     def print_zone(self, zone_nr):
         zone = self.zones[zone_nr]
-        print("x0= %d, y0=%d, w= %d, h=%d" % (zone[0], zone[1], zone[2], zone[3]))
+        self.loger("x0= %d, y0=%d, w= %d, h=%d" % (zone[0], zone[1], zone[2], zone[3]))
 
     def get_zone_coords(self, zone_nr):
         zone = self.zones[zone_nr]
@@ -72,9 +72,9 @@ class Recognize(Zones):
             self.deactivated_zone = self.zone_names[self.active_last_zone]
             time_in_zone = time.time() - self.time_activated
             MainLoop.log_data_csv(self.deactivated_zone, time_in_zone)
-            print("WHICHLOGIC", self.which_logic_Set.value)
-            print("TRIAL_NR", self.trial_nr.value)
-            print("ZONE %s \t DEACTIVATED AFTER \t %f" % (self.deactivated_zone, time_in_zone))
+            self.loger("WHICHLOGIC", self.which_logic_Set.value)
+            self.loger("TRIAL_NR", self.trial_nr.value)
+            self.loger("ZONE %s \t DEACTIVATED AFTER \t %f" % (self.deactivated_zone, time_in_zone))
             self.number_in_zones[self.deactivated_zone] = self.number_in_zones[self.deactivated_zone] + 1
             self.time_in_zones[self.deactivated_zone] = self.time_in_zones[self.deactivated_zone] + time_in_zone
             self.number_in_zones_TRIAL[self.deactivated_zone] = self.number_in_zones_TRIAL[self.deactivated_zone] + 1
@@ -89,29 +89,29 @@ class Recognize(Zones):
         if ((active_zone != -1) & (active_zone != self.active_last_zone)):
             self.activated_zone = self.zone_names[active_zone]
             self.time_activated = time.time()
-            print("ZONE %s \t ACTIVATED" % self.activated_zone)
+            self.loger("ZONE %s \t ACTIVATED" % self.activated_zone)
         self.active_last_zone = self.active_zone
 
     def _check_trial_nr_change(self):
         if self.trial_nr.value != self.old_trial_nr:
             self.old_trial_nr = self.trial_nr.value
-            print("TRIAL_NR_CHANGE", self.old_trial_nr, "->", self.trial_nr.value)
-            print("time in zones_trial", self.time_in_zones_TRIAL)
-            print("number in zones_trial", self.number_in_zones_TRIAL)
+            self.loger("TRIAL_NR_CHANGE", self.old_trial_nr, "->", self.trial_nr.value)
+            self.loger("time in zones_trial", self.time_in_zones_TRIAL)
+            self.loger("number in zones_trial", self.number_in_zones_TRIAL)
             for k in self.time_in_zones_TRIAL.keys():
                 self.time_in_zones_TRIAL[k] = 0.
             for k in self.number_in_zones_TRIAL.keys():
                 self.number_in_zones_TRIAL[k] = 0
 
     def finish(self):
-        print("NR IN ZONES TOTAL", self.number_in_zones)
-        print("TIMES IN ZONES TOTAL", self.time_in_zones)
-        print("NR IN ZONES LEFT", self.number_in_zones_L)
-        print("TIMES IN ZONES LEFT", self.time_in_zones_L)
-        print("NR IN ZONES RIGHT", self.number_in_zones_R)
-        print("TIMES IN ZONES RIGHT", self.time_in_zones_R)
+        self.loger("NR IN ZONES TOTAL", self.number_in_zones)
+        self.loger("TIMES IN ZONES TOTAL", self.time_in_zones)
+        self.loger("NR IN ZONES LEFT", self.number_in_zones_L)
+        self.loger("TIMES IN ZONES LEFT", self.time_in_zones_L)
+        self.loger("NR IN ZONES RIGHT", self.number_in_zones_R)
+        self.loger("TIMES IN ZONES RIGHT", self.time_in_zones_R)
         now = datetime.now()
-        file_name = now.strftime(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\zones%Y%m%d_%H_%M_%S") + ".csv"
+        file_name = now.strftime(f"{Settings.dataLocation}\\zones%Y%m%d_%H_%M_%S") + ".csv"
         fh = open(file_name, "w")
         csv_writer = csv.writer(fh)
         for k in self.time_in_zones.keys():

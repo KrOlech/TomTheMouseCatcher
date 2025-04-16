@@ -6,11 +6,12 @@ from itertools import count
 import cv2
 import numpy
 
+from src.Python.Loger.Loger import Loger
 from src.Python.Recognize.Recognize import Recognize
 from src.Python.Settings import Settings
 
 
-class VideoCapture:
+class VideoCapture(Loger):
     frames = []
     calibration = []
     refCalibration = []
@@ -71,7 +72,7 @@ class VideoCapture:
         try:
             self.runCapture()
         except Exception as e:
-            print(e)
+            self.logError(e)
         else:
             self.rc.finish()
         finally:
@@ -97,7 +98,7 @@ class VideoCapture:
             self.saving_started = True
             self.out = cv2.VideoWriter(datetime.now().strftime(".\\data\\video%Y%m%d_%H_%M_%S") + ".avi", self.fourcc,
                                        20.0, (self.frame.shape[1], self.frame.shape[0]))
-            print("START RECORDING")
+            self.loger("START RECORDING")
 
     def runVideoCaptureSavingFrames(self):
         for i in count(0):
@@ -156,7 +157,7 @@ class VideoCapture:
             if self.last_flagSave and not self.current_flagSave:
                 self.out.release()
                 self.saving_started = 0
-                print("STOP SAVING")
+                self.loger("STOP SAVING")
 
             self.last_flagSave = self.current_flagSave
 
@@ -238,7 +239,7 @@ class VideoCapture:
 
     def calibrate(self):
         if self.capt_frames_nr == 10:
-            print("Starting calibration...")
+            self.loger("Starting calibration...")
             self.calibration_start = 20
 
         if self.calibration_start > 0:
@@ -256,8 +257,8 @@ class VideoCapture:
 
         if self.calibratedFlag and not self.mesageprinted:
             self.mesageprinted = True
-            print("calibration finished")
+            self.loger("calibration finished")
 
         if self.save_calibration:
             self.save_calibration = 0
-            cv2.imwrite(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\self.calibration.jpg", self.frame)
+            cv2.imwrite(f"{Settings.dataLocation}\\self.calibration.jpg", self.frame)

@@ -1,11 +1,10 @@
-from datetime import datetime
 import time
-import numpy
-import os
+
+from src.Python.Loger.Loger import Loger
 from src.Python.Settings import Settings
 
 
-class Zones:
+class Zones(Loger):
     def __init__(self, which_logic_Set, trial_nr):
         self.zones = []
         self.active_pix = []
@@ -45,6 +44,6 @@ class Zones:
     def read_zones(self):
         zones_names = self.get_zone_names()
         for zone_name in zones_names:
-            print("Adding zone ", zone_name)
+            self.loger("Adding zone ", zone_name)
             zone = Settings.zones[zone_name]
             self.add_zone(zone[0], zone[1], zone[2], zone[3], zone_name)

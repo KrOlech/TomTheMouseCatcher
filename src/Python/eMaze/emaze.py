@@ -5,7 +5,7 @@ import numpy
 from src.Python.Settings import Settings
 from src.Python.Doors.DoorControl import DoorControl
 from src.Python.MainLoop.MainLoop import MainLoop  # Line to choose the logic: from (insert logic name) import MainLoop
-from src.Python.Setup.Setup import setUp
+from src.Python.Setup.Setup import Setup
 from src.Python.VideoCapture.VideoCapture import VideoCapture
 from src.Python.Zones.Zones import Zones
 
@@ -30,6 +30,7 @@ class EMaze(MainLoop):
         e = multiprocessing.Event()
 
         self.finishFlag = multiprocessing.Event()
+
 
         self.door_status = multiprocessing.Array('i', numpy.zeros(nr_of_doors, dtype=numpy.uint))
         self.light_status = multiprocessing.Array('i', numpy.zeros(4, dtype=numpy.uint))
@@ -56,11 +57,11 @@ class EMaze(MainLoop):
 
     def LightOn(self, ln):
         self.light_status[ln - 1] = 1
-        print("Light %d turned on" % ln)
+        self.loger("Light %d turned on" % ln)
 
     def LightOff(self, ln):
         self.light_status[ln - 1] = 0
-        print("Light %d turned off" % ln)
+        self.loger("Light %d turned off" % ln)
 
     def get_active_zone(self):
         zone_nr = self.active_zone.value
@@ -86,6 +87,6 @@ class EMaze(MainLoop):
 
 
 if __name__ == '__main__':
-    setUp()
+    Setup().setUp()
     eMaze = EMaze()
     eMaze.mainLoop()

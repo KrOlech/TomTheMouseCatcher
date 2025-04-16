@@ -3,10 +3,11 @@ import time
 import nidaqmx
 import numpy as np
 
+from src.Python.Loger.Loger import Loger
 from src.Python.Settings import Settings
 
 
-class DoorControl:
+class DoorControl(Loger):
 
     def __init__(self, door_status, light_status, finishFlag):
         self.step_nr = 0
@@ -51,7 +52,7 @@ class DoorControl:
         for i in range(self.nr_of_doors):
             door_name = self.door_names[i]
             self.door_status[i] = Settings.initDoorsPos[door_name]
-            print("inital setting for ", door_name, Settings.initDoorsPos[door_name])
+            self.loger("inital setting for ", door_name, Settings.initDoorsPos[door_name])
         for i in range(4):
             self.light_status[i] = 0
 
@@ -67,21 +68,21 @@ class DoorControl:
     def CheckStatusChange(self):
         for i in range(self.nr_of_doors):
             if self.last_status[i] != self.door_status[i]:
-                print(self.door_names[i])
+                self.loger(self.door_names[i])
                 if (self.door_names[i]) not in ["L1", "L2"]:
                     if self.door_status[i] == 1:
-                        print("Opening doors=", self.door_names[i])
+                        self.loger("Opening doors=", self.door_names[i])
                     if self.door_status[i] == 0:
-                        print("Closing doors=", self.door_names[i])
+                        self.loger("Closing doors=", self.door_names[i])
                 else:
-                    print("Opening doors=", self.door_names[i])
+                    self.loger("Opening doors=", self.door_names[i])
                     self.sendStatus()
                     if self.door_names[i] == "L1":
                         time.sleep(Settings.LTime1)
                     if self.door_names[i] == "L2":
                         time.sleep(Settings.LTime2)
                     self.door_status[i] = 0
-                    print("Closing doors=", self.door_names[i])
+                    self.loger("Closing doors=", self.door_names[i])
                     self.sendStatus()
 
             self.last_status[i] = self.door_status[i]

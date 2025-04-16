@@ -90,7 +90,7 @@ class MainLoop(MainLoopAbstract, ABC):
             self.isS1touched = False
             self.drop1 = False
             self.CloseDoor("L1")
-            print("L1 activated")
+            self.loger("L1 activated")
             time.sleep(0.1)
             self.CloseDoor("L1")
             self.OpenDoor("L1")
@@ -98,7 +98,7 @@ class MainLoop(MainLoopAbstract, ABC):
         if self.getActivatedZone() == "H1":
 
             if self.flagTrial:
-                print("Counter=", self.counter)
+                self.loger("Counter=", self.counter)
                 self.counter += 1
 
             self.flagTrial = False
@@ -136,7 +136,7 @@ class MainLoop(MainLoopAbstract, ABC):
             self.isS2touched = False
             self.drop2 = False
             self.CloseDoor("L2")
-            print("L2 activated")
+            self.loger("L2 activated")
             time.sleep(0.1)
             self.CloseDoor("L2")
             self.OpenDoor("L2")
@@ -151,7 +151,7 @@ class MainLoop(MainLoopAbstract, ABC):
         if self.getActivatedZone() == "H2":
 
             if self.flagTrial:
-                print("Counter=", self.counter)
+                self.loger("Counter=", self.counter)
                 self.counter += 1
 
             self.flagTrial = False
@@ -197,7 +197,7 @@ class MainLoop(MainLoopAbstract, ABC):
             self.isS1touched = False
             self.drop1 = False
             self.CloseDoor("L1")
-            print("L1 activated")
+            self.loger("L1 activated")
             time.sleep(0.1)
             self.CloseDoor("L1")
             self.OpenDoor("L1")
@@ -216,7 +216,7 @@ class MainLoop(MainLoopAbstract, ABC):
 
         if self.getActivatedZone() == "H1":
             if self.flagTrial:
-                print("Counter=", self.counter)
+                self.loger("Counter=", self.counter)
                 self.counter += 1
             self.flagTrial = False
             self.whichLogic = Settings.LogicList[self.counter]
@@ -225,7 +225,7 @@ class MainLoop(MainLoopAbstract, ABC):
 
         if self.getActivatedZone() == "H2":
             if self.flagTrial:
-                print("Counter=", self.counter)
+                self.loger("Counter=", self.counter)
                 self.counter += 1
             self.flagTrial = False
             self.whichLogic = Settings.LogicList[self.counter]
@@ -271,7 +271,7 @@ class MainLoop(MainLoopAbstract, ABC):
             self.isS2touched = False
             self.drop2 = False
             self.CloseDoor("L2")
-            print("L2 activated")
+            self.loger("L2 activated")
             time.sleep(0.1)
             self.CloseDoor("L2")
             self.OpenDoor("L2")
@@ -286,7 +286,7 @@ class MainLoop(MainLoopAbstract, ABC):
 
         if self.getActivatedZone() == "H1":
             if self.flagTrial:
-                print("Counter=", self.counter)
+                self.loger("Counter=", self.counter)
                 self.counter += 1
             self.flagTrial = False
             self.whichLogic = Settings.LogicList[self.counter]
@@ -294,7 +294,7 @@ class MainLoop(MainLoopAbstract, ABC):
 
         if self.getActivatedZone() == "H2":
             if self.flagTrial:
-                print("Counter=", self.counter)
+                self.loger("Counter=", self.counter)
                 self.counter += 1
             self.flagTrial = False
             self.whichLogic = Settings.LogicList[self.counter]

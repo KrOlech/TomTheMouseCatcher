@@ -1,27 +1,26 @@
-import os
+import csv
 import time
 from abc import abstractmethod, ABC
-import pygame
-import csv
 
+import pygame
+
+from src.Python.Loger.Loger import Loger
 from src.Python.Settings import Settings
 
-try:
-    pygame.mixer.init()
 
-    sound2 = pygame.mixer.Sound(Settings.expectedLocation + r"\7k_hz.wav")
-    sound1 = pygame.mixer.Sound(Settings.expectedLocation + r"\14k_hz.wav")
-    sound1.set_volume(Settings.volume2)
-    sound2.set_volume(Settings.volume1)
-except FileNotFoundError as e:
-    print(e)
-
-
-class MainLoopAbstract(ABC):
+class MainLoopAbstract(ABC, Loger):
 
     def __init__(self):
-        ...
-        # todo add proper PyGame init
+        try:
+            pygame.mixer.init()
+
+            self.sound2 = pygame.mixer.Sound(Settings.expectedLocation + r"\7k_hz.wav")
+            self.sound1 = pygame.mixer.Sound(Settings.expectedLocation + r"\14k_hz.wav")
+            self.sound1.set_volume(Settings.volume2)
+            self.sound2.set_volume(Settings.volume1)
+        except FileNotFoundError as e:
+            self.logError(e)
+
 
     @abstractmethod
     def checkActivation(self):
@@ -58,47 +57,53 @@ class MainLoopAbstract(ABC):
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")  # Get actual time
         log_entry = [timestamp, zone_name, round(duration, 2)]
 
-        with open(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\zone_activity_log.csv", mode="a",
+        with open(f"{Settings.dataLocation}\\zone_activity_log.csv", mode="a",
                   newline="") as file:
             writer = csv.writer(file)
             writer.writerow(log_entry)
 
-    @staticmethod
-    def _playSound1():
-        try:
-            pygame.mixer.init()
-            sound1.play(loops=-1)
-        except pygame.error as e:
-            print(e)
+    def _playSound1(self):
 
-    @staticmethod
-    def _playSound2():
         try:
             pygame.mixer.init()
-            sound2.play(loops=-1)
+            self.sound1.play(loops=-1)
         except pygame.error as e:
-            print(e)
+            l = Loger()
+            l.logError(e)
+
+    def _playSound2(self):
+        try:
+            pygame.mixer.init()
+            self.sound2.play(loops=-1)
+        except pygame.error as e:
+            l = Loger()
+            l.logError(e)
 
     def _closeDoors(self, names: list[str]):
         for name in names:
             self.CloseDoor(name)
 
+
     def _openDoors(self, names: list[str]):
         for name in names:
             self.OpenDoor(name)
+
 
     def _turnLightsOn(self, ln: list[int]):
         for l in ln:
             self.LightOn(l)
 
+
     def _turnLightsOff(self, ln: list[int]):
         for l in ln:
             self.LightOff(l)
 
+
     def _setS1Flag(self):
         self.isS1touched = True
-        print("Flag S1 set")
+        self.loger("Flag S1 set")
+
 
     def _setS2Flag(self):
         self.isS2touched = True
-        print("Flag S2 set")
+        self.loger("Flag S2 set")
