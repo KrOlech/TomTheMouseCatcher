@@ -51,6 +51,10 @@ class MainLoop(MainLoopAbstract, ABC):
             self.trial_nr.value = self.counter
 
             if self.getActivatedZone() == "A" and self.counter >= Settings.MaxTrials:
+                self.finishFlag.set()
+                break
+
+            if self.finishFlag.is_set():
                 break
 
         self.finishFlag.set()

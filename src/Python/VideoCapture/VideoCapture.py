@@ -162,6 +162,7 @@ class VideoCapture(Loger):
             self.last_flagSave = self.current_flagSave
 
             if (cv2.waitKey(1) and 0xFF == ord('q')) or self.finishFlag.is_set():
+                self.finishFlag.set()
                 break
 
             self.capt_frames_nr = self.capt_frames_nr + 1
@@ -217,9 +218,11 @@ class VideoCapture(Loger):
             self.last_flagSave = self.current_flagSave
 
             if (cv2.waitKey(1) and 0xFF == ord('q')) or self.finishFlag.is_set():
+                self.finishFlag.set()
                 break
 
             if cv2.getWindowProperty(self.windowName, cv2.WND_PROP_VISIBLE) < 1:
+                self.finishFlag.set()
                 break
 
             self.capt_frames_nr = self.capt_frames_nr + 1
