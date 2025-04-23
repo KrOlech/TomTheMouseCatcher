@@ -23,7 +23,7 @@ class DoorControl:
 
     @staticmethod
     def getDoorNames():
-        return sorted(Settings.doors.keys())
+        return sorted(Settings.doors)
 
     @staticmethod
     def getDoorIndex(name, door_names):

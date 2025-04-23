@@ -31,7 +31,7 @@ class VideoCapture(Loger):
     calibration_start = 0
     calibratedFlag = 0
 
-    mesageprinted: bool = False
+    messagePrinted: bool = False
 
     offset_nr = 90
 
@@ -258,8 +258,8 @@ class VideoCapture(Loger):
 
             self.calibration_start = self.calibration_start - 1
 
-        if self.calibratedFlag and not self.mesageprinted:
-            self.mesageprinted = True
+        if self.calibratedFlag and not self.messagePrinted:
+            self.messagePrinted = True
             self.loger("calibration finished")
 
         if self.save_calibration:

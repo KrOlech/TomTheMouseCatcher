@@ -63,7 +63,6 @@ class MainLoopAbstract(ABC, Loger):
             writer.writerow(log_entry)
 
     def _playSound1(self):
-
         try:
             pygame.mixer.init()
             self.sound1.play(loops=-1)
@@ -83,11 +82,9 @@ class MainLoopAbstract(ABC, Loger):
         for name in names:
             self.CloseDoor(name)
 
-
     def _openDoors(self, names: list[str]):
         for name in names:
             self.OpenDoor(name)
-
 
     def _turnLightsOn(self, ln: list[int]):
         for l in ln:

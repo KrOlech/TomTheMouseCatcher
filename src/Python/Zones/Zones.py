@@ -1,10 +1,13 @@
 import time
+from abc import abstractmethod
 
 from src.Python.Loger.Loger import Loger
 from src.Python.Settings import Settings
 
 
 class Zones(Loger):
+
+
     def __init__(self, which_logic_Set, trial_nr):
         self.zones = []
         self.active_pix = []
@@ -28,9 +31,12 @@ class Zones(Loger):
         self.number_in_zones_TRIAL = {}
         self.time_activated = time.time()
 
-    def get_zone_names(self):
-        zone_names = sorted(Settings.zones.keys())
-        for zone in zone_names:
+    @staticmethod
+    def get_zone_names():
+        return sorted(Settings.zones)
+
+    def _rest_zones(self):
+        for zone in self.get_zone_names():
             self.time_in_zones[zone] = 0.
             self.number_in_zones[zone] = 0
             self.time_in_zones_R[zone] = 0.
@@ -39,11 +45,13 @@ class Zones(Loger):
             self.number_in_zones_L[zone] = 0
             self.time_in_zones_TRIAL[zone] = 0.
             self.number_in_zones_TRIAL[zone] = 0
-        return (zone_names)
 
     def read_zones(self):
-        zones_names = self.get_zone_names()
-        for zone_name in zones_names:
+        self._rest_zones()
+        for zone_name, zone_values in Settings.zones.items():
             self.loger("Adding zone ", zone_name)
-            zone = Settings.zones[zone_name]
-            self.add_zone(zone[0], zone[1], zone[2], zone[3], zone_name)
+            self.add_zone(*zone_values, zone_name)
+
+    @abstractmethod
+    def add_zone(self, x0, y0, w, h, zone_name=""):
+        ...

@@ -11,13 +11,14 @@ from src.Python.Zones.Zones import Zones
 
 
 class Recognize(Zones):
+
     def _get_zone(self, image, zone_nr):
         zone = self.zones[zone_nr]
         x0 = zone[0]
         y0 = zone[1]
         w = zone[2]
         h = zone[3]
-        return (image[y0:y0 + h, x0:x0 + w])
+        return image[y0:y0 + h, x0:x0 + w]
 
     def add_zone(self, x0, y0, w, h, zone_name=""):
         self.zones.append([x0, y0, w, h])
@@ -34,22 +35,22 @@ class Recognize(Zones):
 
     def get_zone_coords(self, zone_nr):
         zone = self.zones[zone_nr]
-        return (zone[0], zone[1], zone[2], zone[3])
+        return zone[0], zone[1], zone[2], zone[3]
 
     def get_refer_diff(self, img1, zone_nr):
-        return (self.get_rel_diff(img1, self.ref_image, zone_nr))
+        return self.get_rel_diff(img1, self.ref_image, zone_nr)
 
     def get_rel_diff(self, img1, img2, zone_nr):
         img1_zone = self._get_zone(img1, zone_nr)
         img2_zone = self._get_zone(img2, zone_nr)
         diff = numpy.subtract(img2_zone, img1_zone)
-        return (numpy.sum(abs(diff) > Settings.threshold))
+        return numpy.sum(abs(diff) > Settings.threshold)
 
     def get_active_zone(self, img1):
         active_flag = 0
         for zone_nr in range(self.zones_nr):
             pixels_diff = self.get_refer_diff(img1, zone_nr)
-            if (pixels_diff > Settings.minDiffPix):
+            if pixels_diff > Settings.minDiffPix:
                 self.active_pix[zone_nr] = pixels_diff
                 active_flag = 1
             else:
@@ -58,7 +59,7 @@ class Recognize(Zones):
             self.active_zone = -1
         else:
             self.active_zone = numpy.argmax(self.active_pix)
-        return (self.active_zone)
+        return self.active_zone
 
     def check_zone_change(self):
         active_zone = self.active_zone
@@ -68,7 +69,7 @@ class Recognize(Zones):
         self._check_trial_nr_change()
         self.activated_zone = -1
         self.deactivated_zone = -1
-        if ((active_zone != self.active_last_zone) & (self.active_last_zone != -1)):
+        if (active_zone != self.active_last_zone) & (self.active_last_zone != -1):
             self.deactivated_zone = self.zone_names[self.active_last_zone]
             time_in_zone = time.time() - self.time_activated
             MainLoop.log_data_csv(self.deactivated_zone, time_in_zone)
@@ -86,7 +87,7 @@ class Recognize(Zones):
             if self.which_logic_Set.value == 1:
                 self.number_in_zones_R[self.deactivated_zone] = self.number_in_zones_R[self.deactivated_zone] + 1
                 self.time_in_zones_R[self.deactivated_zone] = self.time_in_zones_R[self.deactivated_zone] + time_in_zone
-        if ((active_zone != -1) & (active_zone != self.active_last_zone)):
+        if (active_zone != -1) & (active_zone != self.active_last_zone):
             self.activated_zone = self.zone_names[active_zone]
             self.time_activated = time.time()
             self.loger("ZONE %s \t ACTIVATED" % self.activated_zone)
