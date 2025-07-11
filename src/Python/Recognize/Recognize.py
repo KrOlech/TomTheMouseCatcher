@@ -70,12 +70,16 @@ class Recognize(Zones):
         self.activated_zone = -1
         self.deactivated_zone = -1
         if (active_zone != self.active_last_zone) & (self.active_last_zone != -1):
+
             self.deactivated_zone = self.zone_names[self.active_last_zone]
+
             time_in_zone = time.time() - self.time_activated
             MainLoop.log_data_csv(self.deactivated_zone, time_in_zone)
+
             self.loger("WHICHLOGIC", self.which_logic_Set.value)
             self.loger("TRIAL_NR", self.trial_nr.value)
             self.loger("ZONE %s \t DEACTIVATED AFTER \t %f" % (self.deactivated_zone, time_in_zone))
+
             self.number_in_zones[self.deactivated_zone] = self.number_in_zones[self.deactivated_zone] + 1
             self.time_in_zones[self.deactivated_zone] = self.time_in_zones[self.deactivated_zone] + time_in_zone
             self.number_in_zones_TRIAL[self.deactivated_zone] = self.number_in_zones_TRIAL[self.deactivated_zone] + 1
@@ -87,6 +91,7 @@ class Recognize(Zones):
             if self.which_logic_Set.value == 1:
                 self.number_in_zones_R[self.deactivated_zone] = self.number_in_zones_R[self.deactivated_zone] + 1
                 self.time_in_zones_R[self.deactivated_zone] = self.time_in_zones_R[self.deactivated_zone] + time_in_zone
+
         if (active_zone != -1) & (active_zone != self.active_last_zone):
             self.activated_zone = self.zone_names[active_zone]
             self.time_activated = time.time()
