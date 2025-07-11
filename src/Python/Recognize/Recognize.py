@@ -12,6 +12,10 @@ from src.Python.Zones.Zones import Zones
 
 class Recognize(Zones):
 
+    zonNames = {5:"Right", 4:"left"}
+
+    execData = 0
+
     def _get_zone(self, image, zone_nr):
         zone = self.zones[zone_nr]
         x0 = zone[0]
@@ -69,6 +73,7 @@ class Recognize(Zones):
         self._check_trial_nr_change()
         self.activated_zone = -1
         self.deactivated_zone = -1
+
         if (active_zone != self.active_last_zone) & (self.active_last_zone != -1):
 
             self.deactivated_zone = self.zone_names[self.active_last_zone]
@@ -91,6 +96,17 @@ class Recognize(Zones):
             if self.which_logic_Set.value == 1:
                 self.number_in_zones_R[self.deactivated_zone] = self.number_in_zones_R[self.deactivated_zone] + 1
                 self.time_in_zones_R[self.deactivated_zone] = self.time_in_zones_R[self.deactivated_zone] + time_in_zone
+
+            if self.deactivated_zone == "D" and active_zone in (5, 4):
+
+                self.loger(f"Mouse went to {self.zonNames[active_zone]}")
+
+                decision = Settings.LogicList[self.execData] == active_zone - 4
+
+                if decision:
+                    self.loger(f"Mouse Make correct decision")
+                else:
+                    self.loger(f"Mouse Make wrong decision")
 
         if (active_zone != -1) & (active_zone != self.active_last_zone):
             self.activated_zone = self.zone_names[active_zone]
