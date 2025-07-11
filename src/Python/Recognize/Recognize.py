@@ -103,6 +103,8 @@ class Recognize(Zones):
 
                 decision = Settings.LogicList[self.execData] == active_zone - 4
 
+                self.execData +=1
+
                 if decision:
                     self.loger(f"Mouse Make correct decision")
                 else:
