@@ -11,8 +11,7 @@ from src.Python.Zones.Zones import Zones
 
 
 class Recognize(Zones):
-
-    zonNames = {5:"Right", 4:"left"}
+    zonNames = {5: "Right", 4: "left"}  # 4:E1 5:E2
 
     execData = 0
 
@@ -85,36 +84,40 @@ class Recognize(Zones):
             self.loger("TRIAL_NR", self.trial_nr.value)
             self.loger("ZONE %s \t DEACTIVATED AFTER \t %f" % (self.deactivated_zone, time_in_zone))
 
-            self.number_in_zones[self.deactivated_zone] = self.number_in_zones[self.deactivated_zone] + 1
-            self.time_in_zones[self.deactivated_zone] = self.time_in_zones[self.deactivated_zone] + time_in_zone
-            self.number_in_zones_TRIAL[self.deactivated_zone] = self.number_in_zones_TRIAL[self.deactivated_zone] + 1
-            self.time_in_zones_TRIAL[self.deactivated_zone] = self.time_in_zones_TRIAL[
-                                                                  self.deactivated_zone] + time_in_zone
-            if self.which_logic_Set.value == 0:
-                self.number_in_zones_L[self.deactivated_zone] = self.number_in_zones_L[self.deactivated_zone] + 1
-                self.time_in_zones_L[self.deactivated_zone] = self.time_in_zones_L[self.deactivated_zone] + time_in_zone
-            if self.which_logic_Set.value == 1:
-                self.number_in_zones_R[self.deactivated_zone] = self.number_in_zones_R[self.deactivated_zone] + 1
-                self.time_in_zones_R[self.deactivated_zone] = self.time_in_zones_R[self.deactivated_zone] + time_in_zone
+            self.number_in_zones[self.deactivated_zone] += 1
+            self.time_in_zones[self.deactivated_zone] += time_in_zone
+            self.number_in_zones_TRIAL[self.deactivated_zone] += 1
+            self.time_in_zones_TRIAL[self.deactivated_zone] += time_in_zone
 
-            if self.deactivated_zone == "D" and active_zone in (5, 4):
+            haveMouseMadeDecision, decisionLeft, decisionRight = None, None, None
 
-                self.loger(f"Mouse went to {self.zonNames[active_zone]}")
+            if self.which_logic_Set.value:
+                self.number_in_zones_R[self.deactivated_zone] += 1
+                self.time_in_zones_R[self.deactivated_zone] += time_in_zone
+                haveMouseMadeDecision, _, decisionRight = self._resolveDecision(active_zone)
+                direction = "Right"
+            else:
+                self.number_in_zones_L[self.deactivated_zone] += 1
+                self.time_in_zones_L[self.deactivated_zone] += time_in_zone
+                haveMouseMadeDecision, decisionLeft, _ = self._resolveDecision(active_zone)
+                direction = "Left"
 
-                decision = Settings.LogicList[self.execData] == active_zone - 4
-
-                self.execData +=1
-
-                if decision:
-                    self.loger(f"Mouse Make correct decision")
-                else:
-                    self.loger(f"Mouse Make wrong decision")
+            if haveMouseMadeDecision and (decisionLeft or decisionRight):
+                self.loger(f"Mouse Make correct decision to the {direction} in logic: {self.which_logic_Set.value}")
+            elif haveMouseMadeDecision:
+                self.loger(f"Mouse Make wrong decision")
 
         if (active_zone != -1) & (active_zone != self.active_last_zone):
             self.activated_zone = self.zone_names[active_zone]
             self.time_activated = time.time()
             self.loger("ZONE %s \t ACTIVATED" % self.activated_zone)
         self.active_last_zone = self.active_zone
+
+    def _resolveDecision(self, active_zone):
+        haveMouseMadeDecision = self.deactivated_zone == "D" and active_zone in (4, 5)
+        decisionLeft = self.deactivated_zone == "D" and active_zone == 5
+        decisionRight = self.deactivated_zone == "D" and active_zone == 4
+        return haveMouseMadeDecision, decisionLeft, decisionRight
 
     def _check_trial_nr_change(self):
         if self.trial_nr.value != self.old_trial_nr:
