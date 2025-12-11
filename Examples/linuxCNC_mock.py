@@ -1,0 +1,6 @@
+
+def stat():
+    ...
+
+class error(Exception):
+    ...
