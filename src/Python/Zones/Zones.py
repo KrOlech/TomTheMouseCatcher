@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 from src.Python.Loger.Loger import Loger
 from src.Python.Settings import Settings
+import serial
 
 
 class Zones(Loger):
@@ -30,6 +31,8 @@ class Zones(Loger):
         self.time_in_zones_TRIAL = {}
         self.number_in_zones_TRIAL = {}
         self.time_activated = time.time()
+
+        self.arduino = serial.Serial(port=Settings.arduinoLineCome, baudrate=Settings.baudrate, timeout=.1)
 
     @staticmethod
     def get_zone_names():

@@ -13,6 +13,8 @@ from src.Python.Zones.Zones import Zones
 class Recognize(Zones):
     zonNames = {5: "Right", 4: "left"}  # 4:E1 5:E2
 
+    zoneMap = {-1:0,0:0,1:1,2:2,3:3,4:3,5:3,6:2,7:2,8:1,9:1,10:0,11:0,12:3,13:3}
+
     execData = 0
 
     def _get_zone(self, image, zone_nr):
@@ -76,6 +78,7 @@ class Recognize(Zones):
         if (active_zone != self.active_last_zone) & (self.active_last_zone != -1):
 
             self.deactivated_zone = self.zone_names[self.active_last_zone]
+            self.arduino.write(bytes(self.zoneMap[active_zone], 'utf-8'))
 
             time_in_zone = time.time() - self.time_activated
             MainLoop.log_data_csv(self.deactivated_zone, time_in_zone)
