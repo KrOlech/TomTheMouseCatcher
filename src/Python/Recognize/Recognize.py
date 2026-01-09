@@ -78,7 +78,8 @@ class Recognize(Zones):
         if (active_zone != self.active_last_zone) & (self.active_last_zone != -1):
 
             self.deactivated_zone = self.zone_names[self.active_last_zone]
-            self.arduino.write(bytes(str(self.zoneMap[active_zone]+2), 'utf-8'))
+            if Settings.arduinoLineCome:
+                self.arduino.write(bytes(str(self.zoneMap[active_zone]+2), 'utf-8'))
 
             time_in_zone = time.time() - self.time_activated
             MainLoop.log_data_csv(self.deactivated_zone, time_in_zone)
