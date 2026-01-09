@@ -1,3 +1,4 @@
+from src.Python.Settings import Settings
 
 class VirtualCarrage:
     ...
@@ -13,17 +14,22 @@ class VirtualCarrage:
     SPEED_PIXELS:float = MAZE_LENGTH_PIZELS * SPEED / MAZE_LENGTH#
 
     def __init__(self):
-        ...
+        if Settings.arduinoLineCome:
+            self.arduino = serial.Serial(port=Settings.arduinoLineCome, baudrate=Settings.baudrate, timeout=.1)
 
-
-    def advance(self, sine, zoneCords):
+    def advance(self, zoneCords):
 
         x0, y0, w, h = zoneCords
 
         if self.position < x0+w/2:
             self.position += self.SPEED
+            if Settings.arduinoLineCome:
+                self.arduino.write(bytes("-1", 'utf-8'))
         if  self.position > x0+w/2:
             self.position -= self.SPEED
+
+            if Settings.arduinoLineCome:
+                self.arduino.write(bytes("1", 'utf-8'))
 
 
         if  self.position > self.MAZE_LENGTH_PIZELS:
