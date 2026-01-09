@@ -8,7 +8,7 @@ FrameHeigth = 1080
 # if provided int number it will connect to usb camera
 # if provided a path to recording it will use that recording instead
 #CamNr = 0
-CamNr = r"C:\Users\Zenbook\Downloads\m16.avi"
+CamNr = r"C:\Users\kradwanska\Desktop\m1.avi"
 
 minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse
@@ -131,7 +131,7 @@ volume1 = 0.28183829312644537
 volume2 = 0.12589254117941673
 
 # Trial numbers flag
-MaxTrials = 30
+MaxTrials = 50
 
 # Trial sequence flag
 # To randomize the list enter Spyder4 interface and copy the last line of result of code provided below:
@@ -170,5 +170,5 @@ expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
 dataLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\data"
 logLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\log"
 
-arduinoLineCome = 'COM4'
-baudrate = 115200
+arduinoLineCome = 'COM3'
+baudrate = 9600
