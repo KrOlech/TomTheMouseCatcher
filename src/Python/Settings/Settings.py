@@ -2,8 +2,8 @@ import os
 
 import nidaqmx
 
-FrameWidth = 1920#960
-FrameHeigth = 1080 #540
+FrameWidth = 1920
+FrameHeigth = 1080
 
 # if provided int number it will connect to usb camera
 # if provided a path to recording it will use that recording instead
@@ -131,7 +131,7 @@ volume1 = 0.28183829312644537
 volume2 = 0.12589254117941673
 
 # Trial numbers flag
-MaxTrials = 30
+MaxTrials = 50
 
 # Trial sequence flag
 # To randomize the list enter Spyder4 interface and copy the last line of result of code provided below:
@@ -170,5 +170,5 @@ expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
 dataLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\data"
 logLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\log"
 
-arduinoLineCome = None#'COM4'
-baudrate = 115200
+arduinoLineCome = None#'COM3'
+baudrate = 9600

@@ -90,11 +90,12 @@ class VideoCapture(Loger):
     def captureFrame(self):
         ret, frame = self.cap.read()
         self.frames.append(frame)
-        self.frame_lum = frame[:, :, 0]
+        self.frame_lum = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
         now = datetime.now()
         self.frame = cv2.putText(frame, str(now), self.org, self.font, self.fontScale, self.color, self.thickness,
                                  cv2.LINE_AA)
+
 
     def startRecording(self):
         if not self.last_flagSave and self.current_flagSave:
