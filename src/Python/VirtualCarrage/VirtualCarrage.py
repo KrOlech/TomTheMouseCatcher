@@ -1,3 +1,5 @@
+import serial
+
 from src.Python.Settings import Settings
 
 class VirtualCarrage:
@@ -24,12 +26,12 @@ class VirtualCarrage:
         if self.position < x0+w/2:
             self.position += self.SPEED
             if Settings.arduinoLineCome:
-                self.arduino.write(bytes(str(self.position), 'utf-8'))
+                self.arduino.write(bytes("1", 'utf-8'))
         if  self.position > x0+w/2:
             self.position -= self.SPEED
 
             if Settings.arduinoLineCome:
-                self.arduino.write(bytes(str(self.position), 'utf-8'))
+                self.arduino.write(bytes("-1", 'utf-8'))
 
 
         if  self.position > self.MAZE_LENGTH_PIZELS:
