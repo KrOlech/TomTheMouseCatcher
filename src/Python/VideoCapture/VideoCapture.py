@@ -9,6 +9,7 @@ import numpy
 from src.Python.Loger.Loger import Loger
 from src.Python.Recognize.Recognize import Recognize
 from src.Python.Settings import Settings
+from src.Python.VirtualCarrage.VirtualCarrage import VirtualCarrage
 
 
 class VideoCapture(Loger):
@@ -43,6 +44,8 @@ class VideoCapture(Loger):
     windowName: str = "output"
 
     def __init__(self, active_zone, recTrigger, finishFlag, which_logic_Set, trial_nr):
+
+        self.virtualCarage = VirtualCarrage()
 
         self.rc = Recognize(which_logic_Set, trial_nr)
         self.rc.read_zones()
@@ -150,6 +153,11 @@ class VideoCapture(Loger):
 
             self.rc.check_zone_change()
 
+            cv2.rectangle(self.frame, (self.virtualCarage.position - 10, 480 - 10),
+                          (self.virtualCarage.position + 10, 480 + 10), (200, 0, 0), 2)
+
+            self.virtualCarage.advance(-1 if self.rc.zoneDelta <0 else 1 )
+
             if self.frame is not None:
                 cv2.imshow(self.windowName, self.frame)
 
@@ -210,7 +218,14 @@ class VideoCapture(Loger):
                 else:
                     cv2.rectangle(self.frame, (x0, y0), (x0 + w, y0 + h), (0, 200, 0), 2)
 
+
             self.rc.check_zone_change()
+
+            cv2.rectangle(self.frame, (self.virtualCarage.position - 10, 480 - 10),
+                          (self.virtualCarage.position + 10, 480 + 10), (200, 0, 0), -1)
+            if lum != -1:
+                self.virtualCarage.advance(self.rc.zoneDelta,  self.rc.get_zone_coords(lum))
+
 
             if self.frame is not None:
                 cv2.imshow(self.windowName, self.frame)

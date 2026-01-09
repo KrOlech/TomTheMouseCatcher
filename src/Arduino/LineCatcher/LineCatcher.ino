@@ -1,7 +1,7 @@
-#define X_EN_PIN 29//3
-#define X_STEP_PIN 6//4  //B6 or A1
-#define X_DIR_PIN 7//5   //B5 or A2
-#define X_END_PIN 0//6   //B4 or A3
+#define X_EN_PIN  4//29//3
+#define X_STEP_PIN 3//6//4  //B6 or A1
+#define X_DIR_PIN 2//7//5   //B5 or A2
+
 
 
 /*
@@ -32,7 +32,7 @@ pinMode(X_EN_PIN, OUTPUT);
 
 }
 
-
+int kad = 0;
 
 void loop() {
   String readString = "";
@@ -46,24 +46,32 @@ void loop() {
   }
 
   int newZone = readString.toInt();
+  
 
   int zoneDelta = current_zone - newZone;
 
   if (zoneDelta > 0){
         digitalWrite(X_DIR_PIN, LOW);
         digitalWrite(X_EN_PIN, LOW);
+        kad = 0;
   }
   else if(zoneDelta < 0){
+
           digitalWrite(X_DIR_PIN, HIGH);
           digitalWrite(X_EN_PIN, LOW);
+          kad = 0;
 
   } else {
-        digitalWrite(X_EN_PIN, HIGH);
+      kad ++;
+  }
+  if (kad > 400){
+      digitalWrite(X_EN_PIN, HIGH);
+      kad = 0;
   }
 
   digitalWrite(X_STEP_PIN, HIGH);
-  delay(10);
+  delay(1);
   digitalWrite(X_STEP_PIN, LOW);
-  delay(10);
+  delay(1);
 
 }

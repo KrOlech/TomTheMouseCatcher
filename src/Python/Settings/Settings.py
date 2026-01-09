@@ -2,8 +2,8 @@ import os
 
 import nidaqmx
 
-FrameWidth = 1920
-FrameHeigth = 1080
+FrameWidth = 1920#960
+FrameHeigth = 1080 #540
 
 # if provided int number it will connect to usb camera
 # if provided a path to recording it will use that recording instead
@@ -170,5 +170,5 @@ expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
 dataLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\data"
 logLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\log"
 
-arduinoLineCome = 'COM4'
+arduinoLineCome = None#'COM4'
 baudrate = 115200

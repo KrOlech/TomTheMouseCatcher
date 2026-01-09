@@ -48,27 +48,7 @@ class DoorControl:
             self.task.do_channels.add_do_chan("Dev1/port0/%s" % ch_id)
         self.task.start()
 
-        # CODE VERSION FOR 7 DOORS
-        # for i in range(self.nr_of_doors):
-        # if door_name in Settings.doors:
-        # ch_info = Settings.doors[door_name]
-        # if 'channel' in ch_info and 'type' in ch_info:
-        # ch_id = ch_info['channel']
-
-        # elif door_name == "D7" and ch_info['type'] == 'DO':
-        # self.task.do_channels.add_do_chan("Dev1/port2/%s" % ch_id)
-        # if ch_info['type'] == 'DO': #here depending whether you use condition in line 59. If you use line 59 then conditional is "elif", but if you do not use line 49 it the conditinal should be "if"
-        # self.task.do_channels.add_do_chan("Dev1/port0/%s" % ch_id)
-        # else:
-        # print(f"Invalid channel type '{ch_info['type']}' for door {door_name}. Skipping...")
-        # Else:
-        # print(f"Channel information incomplete for door {door_name}. Skipping...")
-        # else:
-        # print(f"Door name {door_name} not found in doors dictionary. Skipping...")
-        # self.task.start()
-
         self.setLamps()
-        val = []
         for i in range(self.nr_of_doors):
             door_name = self.door_names[i]
             self.door_status[i] = Settings.initDoorsPos[door_name]
@@ -76,6 +56,27 @@ class DoorControl:
 
         for i in range(4):
             self.light_status[i] = 0
+
+    def _setDors_seven(self):
+        # CODE VERSION FOR 7 DOORS
+        for i in range(self.nr_of_doors):
+            if door_name in Settings.doors:
+                ch_info = Settings.doors[door_name]
+                if 'channel' in ch_info and 'type' in ch_info:
+                    ch_id = ch_info['channel']
+
+                elif door_name == "D7" and ch_info['type'] == 'DO':
+                    self.task.do_channels.add_do_chan("Dev1/port2/%s" % ch_id)
+                    if ch_info['type'] == 'DO': #here depending whether you use condition in line 59. If you use line 59 then conditional is "elif", but if you do not use line 49 it the conditinal should be "if"
+                        self.task.do_channels.add_do_chan("Dev1/port0/%s" % ch_id)
+                    else:
+                        print(f"Invalid channel type '{ch_info['type']}' for door {door_name}. Skipping...")
+                else:
+                    print(f"Channel information incomplete for door {door_name}. Skipping...")
+            else:
+                print(f"Door name {door_name} not found in doors dictionary. Skipping...")
+
+        self.task.start()
 
     def MainLoop(self):
         while True:

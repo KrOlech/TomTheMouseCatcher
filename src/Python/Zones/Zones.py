@@ -32,7 +32,8 @@ class Zones(Loger):
         self.number_in_zones_TRIAL = {}
         self.time_activated = time.time()
 
-        self.arduino = serial.Serial(port=Settings.arduinoLineCome, baudrate=Settings.baudrate, timeout=.1)
+        if Settings.arduinoLineCome:
+            self.arduino = serial.Serial(port=Settings.arduinoLineCome, baudrate=Settings.baudrate, timeout=.1)
 
     @staticmethod
     def get_zone_names():
