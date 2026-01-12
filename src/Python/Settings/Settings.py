@@ -9,6 +9,7 @@ FrameHeigth = 1080
 # if provided a path to recording it will use that recording instead
 #CamNr = 0
 CamNr = r"C:\Users\kradwanska\Desktop\m1.avi"
+fps = 1
 
 minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse

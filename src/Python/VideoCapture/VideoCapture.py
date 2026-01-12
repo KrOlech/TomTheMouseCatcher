@@ -43,6 +43,9 @@ class VideoCapture(Loger):
 
     windowName: str = "output"
 
+    target_fps = Settings.fps
+    frame_delay = 1.0 / target_fps
+
     def __init__(self, active_zone, recTrigger, finishFlag, which_logic_Set, trial_nr):
 
         self.virtualCarage = VirtualCarrage()
@@ -88,6 +91,7 @@ class VideoCapture(Loger):
             self.runVideoCaptureNotSavingFrames()
 
     def captureFrame(self):
+        self.start_time = time.time()
         ret, frame = self.cap.read()
         self.frames.append(frame)
         self.frame_lum = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
@@ -159,6 +163,10 @@ class VideoCapture(Loger):
             if lum != -1:
                 self.virtualCarage.advance( self.rc.get_zone_coords(lum))
 
+            processing_time = time.time() - self.start_time
+            sleep_time = max(0, self.frame_delay - processing_time)
+            time.sleep(sleep_time)
+
             if self.frame is not None:
                 cv2.imshow(self.windowName, self.frame)
 
@@ -227,6 +235,9 @@ class VideoCapture(Loger):
             if lum != -1:
                 self.virtualCarage.advance( self.rc.get_zone_coords(lum))
 
+            processing_time = time.time() - self.start_time
+            sleep_time = max(0, self.frame_delay - processing_time)
+            time.sleep(sleep_time)
 
             if self.frame is not None:
                 cv2.imshow(self.windowName, self.frame)

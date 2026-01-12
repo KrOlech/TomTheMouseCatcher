@@ -45,28 +45,21 @@ void loop() {
     }
   }
 
-  int newZone = readString.toInt();
-  
+  int direction = readString.toInt();
 
-  int zoneDelta = current_zone - newZone;
-
-  if (zoneDelta > 0){
+  if (direction == -1 ){
+  //left
         digitalWrite(X_DIR_PIN, LOW);
         digitalWrite(X_EN_PIN, LOW);
         kad = 0;
   }
-  else if(zoneDelta < 0){
-
+  else if(direction == 1){
+  //right
           digitalWrite(X_DIR_PIN, HIGH);
           digitalWrite(X_EN_PIN, LOW);
-          kad = 0;
 
-  } else {
-      kad ++;
-  }
-  if (kad > 400){
+  } else if (direction == 100){
       digitalWrite(X_EN_PIN, HIGH);
-      kad = 0;
   }
 
   digitalWrite(X_STEP_PIN, HIGH);

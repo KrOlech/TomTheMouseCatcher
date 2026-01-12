@@ -1,8 +1,9 @@
 import serial
 
 from src.Python.Settings import Settings
+from src.Python.Loger import Loger
 
-class VirtualCarrage:
+class VirtualCarrage(Loger):
     ...
 
     position:int = 100
@@ -24,15 +25,25 @@ class VirtualCarrage:
         x0, y0, w, h = zoneCords
 
         if self.position < x0+w/2:
+            #right
             self.position += self.SPEED
+            self.log("moving virtual carriage to the right")
             if Settings.arduinoLineCome:
+                self.log("saving commend to Arduino")
                 self.arduino.write(bytes("1", 'utf-8'))
-        if  self.position > x0+w/2:
+        elif  self.position > x0+w/2:
+            #left
             self.position -= self.SPEED
-
+            self.log("moving virtual carriage to the Left")
             if Settings.arduinoLineCome:
+                self.log("saving commend to Arduino")
                 self.arduino.write(bytes("-1", 'utf-8'))
-
+        else:
+            #stop
+            self.log("Stoping virtual carriage")
+            if Settings.arduinoLineCome:
+                self.log("saving commend to Arduino")
+                self.arduino.write(bytes("100", 'utf-8'))
 
         if  self.position > self.MAZE_LENGTH_PIZELS:
             self.position = self.MAZE_LENGTH_PIZELS
