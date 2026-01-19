@@ -104,7 +104,7 @@ class VideoCapture(Loger):
     def startRecording(self):
         if not self.last_flagSave and self.current_flagSave:
             self.saving_started = True
-            self.out = cv2.VideoWriter(datetime.now().strftime(".\\data\\video%Y%m%d_%H_%M_%S") + ".avi", self.fourcc,
+            self.out = cv2.VideoWriter(datetime.now().strftime(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\video%Y%m%d_%H_%M_%S") + ".avi", self.fourcc,
                                        20.0, (self.frame.shape[1], self.frame.shape[0]))
             self.loger("START RECORDING")
 
@@ -180,6 +180,16 @@ class VideoCapture(Loger):
 
             if (cv2.waitKey(1) and 0xFF == ord('q')) or self.finishFlag.is_set():
                 self.finishFlag.set()
+                self.out.release()
+                self.saving_started = 0
+                self.loger("STOP SAVING")
+                break
+
+            if cv2.getWindowProperty(self.windowName, cv2.WND_PROP_VISIBLE) < 1:
+                self.finishFlag.set()
+                self.out.release()
+                self.saving_started = 0
+                self.loger("STOP SAVING")
                 break
 
             self.capt_frames_nr = self.capt_frames_nr + 1

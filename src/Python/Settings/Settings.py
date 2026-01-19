@@ -8,8 +8,9 @@ FrameHeigth = 1080
 # if provided int number it will connect to usb camera
 # if provided a path to recording it will use that recording instead
 #CamNr = 0
-CamNr = r"C:\Users\kradwanska\Desktop\m1.avi"
-fps = 1
+CamNr = r"C:\Users\Zenbook\Downloads\m16.avi"
+
+fps = 20
 
 minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse
@@ -114,7 +115,7 @@ initDoorsPos["L1"] = 0
 initDoorsPos["L2"] = 0
 
 # Flag for showing zone frames and active/inactive state on videos
-showZones = False
+showZones = True
 
 # Check for value = 0.01 first if the drop forms and stays on the needle (other times to try for water: 0.1, 5% sach: 0.05 and milk: 0.01); 0.003 s yields 10 uL of milk
 LTime1 = 0.25
@@ -171,5 +172,5 @@ expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
 dataLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\data"
 logLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\log"
 
-arduinoLineCome = 'COM3'
+arduinoLineCome = None#'COM3'
 baudrate = 9600
