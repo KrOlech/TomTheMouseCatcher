@@ -87,6 +87,9 @@ class VideoCapture(Loger):
     def runCapture(self):
         if Settings.showZones:
             self.runVideoCaptureSavingFrames()
+            self.out.release()
+            self.saving_started = 0
+            self.loger("STOP SAVING")
         else:
             self.runVideoCaptureNotSavingFrames()
 
@@ -180,16 +183,10 @@ class VideoCapture(Loger):
 
             if (cv2.waitKey(1) and 0xFF == ord('q')) or self.finishFlag.is_set():
                 self.finishFlag.set()
-                self.out.release()
-                self.saving_started = 0
-                self.loger("STOP SAVING")
                 break
 
             if cv2.getWindowProperty(self.windowName, cv2.WND_PROP_VISIBLE) < 1:
                 self.finishFlag.set()
-                self.out.release()
-                self.saving_started = 0
-                self.loger("STOP SAVING")
                 break
 
             self.capt_frames_nr = self.capt_frames_nr + 1
