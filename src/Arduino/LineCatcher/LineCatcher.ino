@@ -51,7 +51,6 @@ void loop() {
   //left
         digitalWrite(X_DIR_PIN, LOW);
         digitalWrite(X_EN_PIN, LOW);
-        kad = 0;
   }
   else if(direction == 1){
   //right

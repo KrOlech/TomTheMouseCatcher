@@ -10,6 +10,7 @@ from src.Python.eMaze.emazeNodors import EMazeNoDoors
 class EMaze(EMazeNoDoors):
 
     def __init__(self):
+        self.logStart()
         super(EMaze, self).__init__()
 
         self.door_status = multiprocessing.Array('i', numpy.zeros(self.nr_of_doors, dtype=numpy.uint))
@@ -17,6 +18,7 @@ class EMaze(EMazeNoDoors):
 
         self.dc = multiprocessing.Process(target=DoorControl,
                                           args=(self.door_status, self.light_status, self.finishFlag,))
+
 
     def run(self):
         self.p.start()

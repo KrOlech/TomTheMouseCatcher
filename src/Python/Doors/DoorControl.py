@@ -86,6 +86,7 @@ class DoorControl:
             self.step_nr = self.step_nr + 1
             if self.finishFlag.is_set():
                 break
+        self.logEnd()
 
     def CheckStatusChange(self):
         for i in range(self.nr_of_doors):
