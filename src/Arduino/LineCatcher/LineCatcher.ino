@@ -9,10 +9,12 @@ pinMode(X_DIR_PIN, OUTPUT);
 pinMode(X_STEP_PIN, OUTPUT);
 pinMode(X_EN_PIN, OUTPUT);
 
-analogWrite(X_STEP_PIN,127); //500 hz
+digitalWrite(X_EN_PIN, HIGH);
+
+analogWrite(X_STEP_PIN,127);
 }
 
-String ver = "1.2";
+String ver = "1.3";
 
 void loop() {
   String readString = "";
@@ -31,7 +33,7 @@ void loop() {
   //left
     digitalWrite(X_DIR_PIN, LOW);
     digitalWrite(X_EN_PIN, LOW);
-    Serial.println("left "+ver);ś
+    Serial.println("left "+ver);
   }
   else if(direction == 1){
   //right
