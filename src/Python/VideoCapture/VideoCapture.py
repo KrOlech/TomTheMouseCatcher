@@ -85,13 +85,11 @@ class VideoCapture(Loger):
             self.releaseCapture()
 
     def runCapture(self):
-        if Settings.showZones:
-            self.runVideoCaptureSavingFrames()
-            self.out.release()
-            self.saving_started = 0
-            self.loger("STOP SAVING")
-        else:
-            self.runVideoCaptureNotSavingFrames()
+        self.runVideoCaptureSavingFrames()
+        self.out.release()
+        self.saving_started = 0
+        self.loger("STOP SAVING")
+
 
     def captureFrame(self):
         self.start_time = time.time()
@@ -129,7 +127,7 @@ class VideoCapture(Loger):
 
             self.startRecording()
 
-            if not Settings.showZones and self.saving_started:
+            if self.saving_started:
                 self.out.write(self.rowFrame)
 
             if self.recTrigger.is_set():
@@ -182,79 +180,16 @@ class VideoCapture(Loger):
 
             if (cv2.waitKey(1) and 0xFF == ord('q')) or self.finishFlag.is_set():
                 self.finishFlag.set()
+                self.out.release()
+                self.saving_started = 0
+                self.loger("STOP SAVING")
                 break
 
             if cv2.getWindowProperty(self.windowName, cv2.WND_PROP_VISIBLE) < 1:
                 self.finishFlag.set()
-                break
-
-            self.capt_frames_nr = self.capt_frames_nr + 1
-
-            self.active_zone.value = self.rc.active_zone
-
-    def runVideoCaptureNotSavingFrames(self):
-        for i in count(0):
-
-            self.captureFrame()
-
-            if i <= self.offset_nr:
-                continue
-
-            self.recTrigger.set()
-
-            if self.recTrigger.is_set():
-                self.current_flagSave = 1
-            else:
-                self.current_flagSave = 0
-
-            # CALIBRATE
-            self.calibrate()
-
-
-            if self.recTrigger.is_set():
-                if self.calibratedFlag == 0:
-                    cv2.circle(self.frame, (30, 17), 10, (0, 0, 255), -1)
-                else:
-                    cv2.circle(self.frame, (30, 17), 10, (0, 255, 0), -1)
-
-            if self.calibratedFlag == 1:
-                lum = (self.rc.get_active_zone(self.frame_lum))
-            else:
-                lum = -1
-
-            self.zone_active_last = self.zone_active
-
-            for zone_nr in range(self.rc.zones_nr):
-                x0, y0, w, h = self.rc.get_zone_coords(zone_nr)
-                if lum == zone_nr:
-                    cv2.rectangle(self.frame, (x0, y0), (x0 + w, y0 + h), (0, 0, 250), 2)
-                else:
-                    cv2.rectangle(self.frame, (x0, y0), (x0 + w, y0 + h), (0, 200, 0), 2)
-
-
-            self.rc.check_zone_change()
-
-            cv2.rectangle(self.frame, (self.virtualCarage.position - 10, 480 - 10),
-                          (self.virtualCarage.position + 10, 480 + 10), (200, 0, 0), -1)
-            if lum != -1:
-                self.virtualCarage.advance( self.rc.get_zone_coords(lum))
-
-            #todo only for playback from wideo
-            processing_time = time.time() - self.start_time
-            sleep_time = max(0, self.frame_delay - processing_time)
-            time.sleep(sleep_time)
-
-            if self.frame is not None:
-                cv2.imshow(self.windowName, self.frame)
-
-            self.last_flagSave = self.current_flagSave
-
-            if (cv2.waitKey(1) and 0xFF == ord('q')) or self.finishFlag.is_set():
-                self.finishFlag.set()
-                break
-
-            if cv2.getWindowProperty(self.windowName, cv2.WND_PROP_VISIBLE) < 1:
-                self.finishFlag.set()
+                self.out.release()
+                self.saving_started = 0
+                self.loger("STOP SAVING")
                 break
 
             self.capt_frames_nr = self.capt_frames_nr + 1
