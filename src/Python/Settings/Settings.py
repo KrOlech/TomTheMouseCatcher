@@ -10,7 +10,7 @@ FrameHeigth = 1080
 #CamNr = 0
 CamNr = r"C:\Users\Zenbook\Downloads\m16.avi"
 
-fps = 20
+fps = 5
 
 minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse
@@ -172,5 +172,5 @@ expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
 dataLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\data"
 logLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\log"
 
-arduinoLineCome = None#'COM3'
+arduinoLineCome = None#'COM6'
 baudrate = 9600

@@ -1,5 +1,6 @@
 import os
 import time
+from copy import deepcopy
 from datetime import datetime
 from itertools import count
 
@@ -7,13 +8,12 @@ import cv2
 import numpy
 
 from src.Python.Loger.Loger import Loger
-from src.Python.Recognize.Recognize import Recognize
+from src.Python.Recognize.Recognize_AB_Filter import Recognize
 from src.Python.Settings import Settings
 from src.Python.VirtualCarrage.VirtualCarrage import VirtualCarrage
 
 
 class VideoCapture(Loger):
-    frames = []
     calibration = []
     refCalibration = []
 
@@ -96,9 +96,8 @@ class VideoCapture(Loger):
     def captureFrame(self):
         self.start_time = time.time()
         ret, frame = self.cap.read()
-        self.frames.append(frame)
-        self.frame_lum = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-
+        self.frame_lum = frame
+        self.rowFrame = deepcopy(frame)
         now = datetime.now()
         self.frame = cv2.putText(frame, str(now), self.org, self.font, self.fontScale, self.color, self.thickness,
                                  cv2.LINE_AA)
@@ -108,7 +107,7 @@ class VideoCapture(Loger):
         if not self.last_flagSave and self.current_flagSave:
             self.saving_started = True
             self.out = cv2.VideoWriter(datetime.now().strftime(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\video%Y%m%d_%H_%M_%S") + ".avi", self.fourcc,
-                                       20.0, (self.frame.shape[1], self.frame.shape[0]))
+                                       20.0, (self.rowFrame.shape[1], self.rowFrame.shape[0]))
             self.loger("START RECORDING")
 
     def runVideoCaptureSavingFrames(self):
@@ -131,10 +130,7 @@ class VideoCapture(Loger):
             self.startRecording()
 
             if not Settings.showZones and self.saving_started:
-                self.out.write(self.frame)
-
-            # Display the resulting frame
-            self.frames.pop(0)
+                self.out.write(self.rowFrame)
 
             if self.recTrigger.is_set():
                 if self.calibratedFlag == 0:
@@ -143,7 +139,7 @@ class VideoCapture(Loger):
                     cv2.circle(self.frame, (30, 17), 10, (0, 255, 0), -1)
 
             if self.calibratedFlag == 1:
-                lum = (self.rc.get_active_zone(self.frame_lum))
+                lum = self.rc.get_active_zone(self.frame_lum)
             else:
                 lum = -1
 
@@ -157,12 +153,15 @@ class VideoCapture(Loger):
                     cv2.rectangle(self.frame, (x0, y0), (x0 + w, y0 + h), (0, 200, 0), 2)
 
             if Settings.showZones and self.saving_started:
-                self.out.write(self.frame)
+                self.out.write(self.rowFrame)
 
             self.rc.check_zone_change()
 
             cv2.rectangle(self.frame, (self.virtualCarage.position - 10, 480 - 10),
                           (self.virtualCarage.position + 10, 480 + 10), (200, 0, 0), -1)
+
+            cv2.circle(self.frame, (int(self.rc.px), int(self.rc.py)), 4, (0, 0, 255), -1)
+
             if lum != -1:
                 self.virtualCarage.advance( self.rc.get_zone_coords(lum))
 
@@ -211,8 +210,6 @@ class VideoCapture(Loger):
             # CALIBRATE
             self.calibrate()
 
-            # Display the resulting frame
-            self.frames.pop(0)
 
             if self.recTrigger.is_set():
                 if self.calibratedFlag == 0:
@@ -242,6 +239,7 @@ class VideoCapture(Loger):
             if lum != -1:
                 self.virtualCarage.advance( self.rc.get_zone_coords(lum))
 
+            #todo only for playback from wideo
             processing_time = time.time() - self.start_time
             sleep_time = max(0, self.frame_delay - processing_time)
             time.sleep(sleep_time)
@@ -280,9 +278,11 @@ class VideoCapture(Loger):
             self.calibration_start = 20
 
         if self.calibration_start > 0:
-            self.calibration.append(self.frame_lum.copy())
+            self.calibration.append(cv2.cvtColor(self.frame_lum, cv2.COLOR_RGB2GRAY).copy())
             self.refCalibration = numpy.mean(self.calibration, axis=0)
-            self.rc.set_ref_image(self.refCalibration)
+            self.rc.set_ref_image(self.frame_lum)
+            #todo proper calibration for new recognize
+            #self.rc.set_ref_image(self.refCalibration) #old save image for old recognize
 
             if self.calibration_start:
                 self.refCalibration = numpy.mean(self.calibration, axis=0)

@@ -9,7 +9,7 @@ pinMode(X_DIR_PIN, OUTPUT);
 pinMode(X_STEP_PIN, OUTPUT);
 pinMode(X_EN_PIN, OUTPUT);
 
-analogWrite(X_STEP_PIN,127);
+analogWrite(X_STEP_PIN,127); //500 hz
 }
 
 String ver = "1.2";
