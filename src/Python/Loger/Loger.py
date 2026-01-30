@@ -10,7 +10,7 @@ class Loger:
 
     def logStart(self):
         self._logImportant(" Program Starting ", (41, 42))
-        self._logImportant(" Program V1.1.0.5 qf1", (41, 42))
+        self._logImportant(" Program V1.1.0.6 ", (41, 42))
 
     def logEnd(self):
         self._logImportant(" Program Stoping ", (41, 42))
