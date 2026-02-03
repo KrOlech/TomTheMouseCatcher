@@ -4,9 +4,9 @@ import nidaqmx
 import numpy as np
 
 from src.Python.Settings import Settings
+from src.Python.Loger.Loger import Loger
 
-
-class DoorControl:
+class DoorControl(Loger):
 
     def __init__(self, door_status, light_status, finishFlag):
         self.step_nr = 0
@@ -70,11 +70,11 @@ class DoorControl:
                     if ch_info['type'] == 'DO': #here depending whether you use condition in line 59. If you use line 59 then conditional is "elif", but if you do not use line 49 it the conditinal should be "if"
                         self.task.do_channels.add_do_chan("Dev1/port0/%s" % ch_id)
                     else:
-                        print(f"Invalid channel type '{ch_info['type']}' for door {door_name}. Skipping...")
+                        self.loger(f"Invalid channel type '{ch_info['type']}' for door {door_name}. Skipping...")
                 else:
-                    print(f"Channel information incomplete for door {door_name}. Skipping...")
+                    self.loger(f"Channel information incomplete for door {door_name}. Skipping...")
             else:
-                print(f"Door name {door_name} not found in doors dictionary. Skipping...")
+                self.loger(f"Door name {door_name} not found in doors dictionary. Skipping...")
 
         self.task.start()
 
