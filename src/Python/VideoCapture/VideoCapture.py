@@ -45,6 +45,7 @@ class VideoCapture(Loger):
 
     target_fps = Settings.fps
     frame_delay = 1.0 / target_fps
+    start_time = 0
 
     def __init__(self, active_zone, recTrigger, finishFlag, which_logic_Set, trial_nr):
 
@@ -110,6 +111,7 @@ class VideoCapture(Loger):
             self.loger("START RECORDING")
 
     def runVideoCaptureSavingFrames(self):
+        sleep_time =0
         for i in count(0):
 
             self.captureFrame()
@@ -161,6 +163,10 @@ class VideoCapture(Loger):
 
             cv2.rectangle(self.frame, (self.virtualCarage.position - 10, 480 - 10),
                           (self.virtualCarage.position + 10, 480 + 10), (200, 0, 0), -1)
+
+            cv2.putText(self.frame, str(self.virtualCarage.positionMM), (self.virtualCarage.position + 10, 480 + 10), self.font, self.fontScale, self.color, self.thickness,
+                        cv2.LINE_AA)
+
             if lum != -1:
                 self.virtualCarage.advance( self.rc.get_zone_coords(lum))
 

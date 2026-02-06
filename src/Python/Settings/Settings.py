@@ -10,7 +10,7 @@ FrameHeigth = 1080
 #CamNr = 0
 CamNr = r"C:\Users\Zenbook\Downloads\m16.avi"
 
-fps = 20
+fps = 5
 
 minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse

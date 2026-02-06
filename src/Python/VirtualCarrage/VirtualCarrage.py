@@ -9,16 +9,6 @@ from src.Python.Loger.Loger import Loger
 class VirtualCarrage(Loger):
     position: int = 100
 
-    SPEED: int = 50  # m/s
-    SPEED_STEPS: int = 500 # ps/s
-
-    MAZE_LENGTH: float = 1.5  # mm
-    MAZE_LENGTH_MM: float = 1.5*1000  # mm
-
-    MAZE_LENGTH_PIZELS: int = 1920
-
-    SPEED_PIXELS: int = int(MAZE_LENGTH_PIZELS * SPEED / MAZE_LENGTH)
-
     OneFullRotation_Steps:int = 200
 
     Gear_1_cog_count:int = 80
@@ -42,6 +32,16 @@ class VirtualCarrage(Loger):
 
     safetyDistance = 20 #mm
 
+    SPEED_STEPS: int = 500 # ps/s
+    SPEED: int = SPEED_STEPS*oneSteplength  # m/s
+
+    MAZE_LENGTH: float = 1.5  # mm
+    MAZE_LENGTH_MM: float = 1.5*1000  # mm
+
+    MAZE_LENGTH_PIZELS: int = 1920
+
+    SPEED_PIXELS: int = int(MAZE_LENGTH_PIZELS * SPEED / MAZE_LENGTH_MM)
+
 
     def __init__(self):
         if Settings.arduinoLineCome:
@@ -53,44 +53,34 @@ class VirtualCarrage(Loger):
 
         x0, y0, w, h = zoneCords
 
-        if self.position < x0 + w / 2 - self.SPEED // 2:
+        if self.position < x0 + w / 2 - self.SPEED // 5:
             # right
-            self.position += self.SPEED
             if self.last_status != "right":
                 self.last_status = "right"
                 self.loger("moving virtual carriage to the right")
                 if Settings.arduinoLineCome:
-                    self.loger("sending right commend to Arduino")
-                    self.arduino.write(bytes("1", 'utf-8'))
-                    self.loger(f"Arduino ack: {self.arduino.readline()}")
-                    self.timeGoingRight = time.time()
+                    self.__arduinoLeft()
+                self.timeGoingRight = time.time()
 
             else:
                 timeDelta = time.time() - self.timeGoingRight
                 self.timeGoingRight = time.time()
                 stepsDone = self.SPEED_STEPS * timeDelta
-                self.positionMM+= self.oneSteplength*stepsDone
+                self.positionMM += self.oneSteplength*stepsDone
                 if self.positionMM > self.MAZE_LENGTH_MM-self.safetyDistance:
                     self.loger("Stoping virtual carriage")
                     if Settings.arduinoLineCome:
-                        self.loger("sending stop commend to Arduino")
-                        self.arduino.write(bytes("100", 'utf-8'))
-                        self.loger(f"Arduino ack: {self.arduino.readline()}")
+                        self.__arduinoStop()
 
 
-
-
-        elif self.position > x0 + w / 2 + self.SPEED // 2:
+        elif self.position > x0 + w / 2 + self.SPEED // 5:
             # left
-            self.position -= self.SPEED
             if self.last_status != "Left":
                 self.last_status = "Left"
                 self.loger("moving virtual carriage to the Left")
                 if Settings.arduinoLineCome:
-                    self.loger("sending left commend to Arduino")
-                    self.arduino.write(bytes("-1", 'utf-8'))
-                    self.loger(f"Arduino ack: {self.arduino.readline()}")
-                    self.timeGoingLeft = time.time()
+                    self.__arduinoLeft()
+                self.timeGoingLeft = time.time()
             else:
                 timeDelta = time.time() - self.timeGoingLeft
                 self.timeGoingLeft = time.time()
@@ -99,9 +89,7 @@ class VirtualCarrage(Loger):
                 if self.positionMM < self.safetyDistance:
                     self.loger("Stoping virtual carriage")
                     if Settings.arduinoLineCome:
-                        self.loger("sending stop commend to Arduino")
-                        self.arduino.write(bytes("100", 'utf-8'))
-                        self.loger(f"Arduino ack: {self.arduino.readline()}")
+                        self.__arduinoStop()
 
         else:
             # stop
@@ -109,19 +97,20 @@ class VirtualCarrage(Loger):
                 self.last_status = "stop"
                 self.loger("Stoping virtual carriage")
                 if Settings.arduinoLineCome:
-                    self.loger("sending stop commend to Arduino")
-                    self.arduino.write(bytes("100", 'utf-8'))
-                    self.loger(f"Arduino ack: {self.arduino.readline()}")
+                    self.__arduinoStop()
 
-        if self.position > self.MAZE_LENGTH_PIZELS:
-            if Settings.arduinoLineCome:
-                self.loger("sending stop commend to Arduino")
-                self.arduino.write(bytes("100", 'utf-8'))
-                self.loger(f"Arduino ack: {self.arduino.readline()}")
-            self.position = self.MAZE_LENGTH_PIZELS
-        if self.position < 0:
-            if Settings.arduinoLineCome:
-                self.loger("sending stop commend to Arduino")
-                self.arduino.write(bytes("100", 'utf-8'))
-                self.loger(f"Arduino ack: {self.arduino.readline()}")
-            self.position = 0
+        self.position = int(self.positionMM*self.MAZE_LENGTH_PIZELS/self.MAZE_LENGTH_MM)
+
+    def __arduinoStop(self):
+        self.__arduinoComand("100","stop")
+    def __arduinoRight(self):
+        self.__arduinoComand("1","right")
+
+    def __arduinoLeft(self):
+        self.__arduinoComand("-1","left")
+
+    def __arduinoComand(self, comand, comandName):
+        self.loger(f"sending {comandName} commend to Arduino")
+        self.arduino.write(bytes(comand, 'utf-8'))
+        self.loger(f"Arduino ack: {self.arduino.readline()}")
+
