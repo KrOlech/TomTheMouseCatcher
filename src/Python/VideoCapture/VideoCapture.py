@@ -2,6 +2,7 @@ import os
 import time
 from datetime import datetime
 from itertools import count
+from copy import deepcopy
 
 import cv2
 import numpy
