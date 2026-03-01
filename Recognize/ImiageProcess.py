@@ -148,38 +148,45 @@ class ImageProcess:
 
         dif = self.ogImg- self.firstFrame
 
-        lower_bound = np.array([90, 100, 100])  # Dolna granica
-        upper_bound = np.array([95, 155, 255])  # Górna granica
+        lower_bound = np.array([0, 0, 210])  # Dolna granica
+        upper_bound = np.array([110, 25, 250])  # Górna granica
+
         lower, upper = self.readTrackBars()
+
         gray = self.__maskImage(dif, lower, upper)
 
-        cv2.imshow("Mask0", gray)
 
-        #gray = cv2.cvtColor(dif, cv2.COLOR_BGR2GRAY)
-        #hsv = hsv - self.firstFrame
+        hsv = self.__maskImage(dif, lower_bound, upper_bound)
 
-        blur = cv2.GaussianBlur(gray, (0, 0), sigmaX=33, sigmaY=33)
-
-        # divide
-        divide = cv2.divide(gray, blur, scale=255)
-        out_binary = cv2.threshold(divide, 200, 255, cv2.THRESH_OTSU)[1]
-
-        erosion_size = 0
+        erosion_size = 1
         erosion_shape = cv2.MORPH_ELLIPSE
 
         element = cv2.getStructuringElement(erosion_shape, (2 * erosion_size + 1, 2 * erosion_size + 1),
                                            (erosion_size, erosion_size))
 
-        out_binary = cv2.erode(out_binary, element)
+        hsv = self.__blure(hsv)
+        hsv = cv2.erode(hsv, element)
 
-        #hsv[hsv < 170] = 0
-        #hsv[hsv > 180] = 255
-        #hsv = cv2.GaussianBlur(hsv, (3, 3), 0)
-        #hsv = cv2.cvtColor(hsv, cv2.COLOR_GRAY2BGR)
+        out_binary = self.__blure(gray)
 
-        #cv2.fastNlMeansDenoisingColored(hsv, None, 10,10,7,21)
+        mainPartmask = hsv[190:1080,910:1460]
+        mainPart = out_binary[190:1080,910:1460]
+        mainCombine = cv2.add(mainPart, mainPartmask)
+
+        out_binary[190:1080,910:1460] = mainCombine
+
+        cv2.imshow("Mask0",hsv)
+
 
         return out_binary
+
+    @staticmethod
+    def __blure(img):
+        blur = cv2.GaussianBlur(img, (0, 0), sigmaX=33, sigmaY=33)
+
+        # divide
+        divide = cv2.divide(img, blur, scale=255)
+        return cv2.threshold(divide, 200, 255, cv2.THRESH_OTSU)[1]
 
     @staticmethod
     def __maskImage(img, lower, upper):
@@ -202,7 +209,7 @@ class ImageProcess:
             cx = int(M["m10"] / M["m00"])
             cy = int(M["m01"] / M["m00"])
 
-        self.contoursToShow = []#[(self.mazeRecData,"maze",cx,cy)]
+        self.contoursToShow = [((930,215,530,865),"Plexy",cx,cy)]#[(self.mazeRecData,"maze",cx,cy)]
 
 
         for cnt in self.contours:
@@ -241,12 +248,12 @@ class ImageProcess:
             if not (0.25 < aspect < 3.3):
                 continue
 
-            self.contoursToShow.append((cnt, f"mous {int(area)}, {int(aspect*10)}", cx, cy))
+            self.contoursToShow.append((cv2.boundingRect(cnt), f"mous {int(area)}, {int(aspect*10)}", cx, cy))
 
     def showContours(self):
         for contour in self.contoursToShow:
 
-            xm, y, w, h = cv2.boundingRect(contour[0])
+            xm, y, w, h = contour[0]
 
             cv2.rectangle(self.img, (xm, y), (xm + w, y + h), (0, 255, 0), 2)
             cv2.rectangle(self.mask_vis, (xm, y), (xm + w, y + h), (0, 255, 0), 2)
@@ -287,6 +294,7 @@ class ImageProcess:
                 self.firstFrame = deepcopy(self.ogImg)#cv2.cvtColor(self.ogImg, cv2.COLOR_BGR2GRAY)
 
             self.__update()
+
 
             #while cv2.waitKey(30) & 0xFF != ord('d'):
             #    ...

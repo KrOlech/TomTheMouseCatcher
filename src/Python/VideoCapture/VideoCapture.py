@@ -220,6 +220,9 @@ class VideoCapture(Loger):
         self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)  # manual mode
 
     def calibrate(self):
+        if self.capt_frames_nr == 1:
+            self.rc.set_ref_image(self.frame_lum)
+
         if self.capt_frames_nr == 10:
             self.loger("Starting calibration...")
             self.calibration_start = 20
@@ -227,7 +230,7 @@ class VideoCapture(Loger):
         if self.calibration_start > 0:
             self.calibration.append(cv2.cvtColor(self.frame_lum, cv2.COLOR_RGB2GRAY).copy())
             self.refCalibration = numpy.mean(self.calibration, axis=0)
-            self.rc.set_ref_image(self.frame_lum)
+            #self.rc.set_ref_image(self.frame_lum)
             #todo proper calibration for new recognize
             #self.rc.set_ref_image(self.refCalibration) #old save image for old recognize
 

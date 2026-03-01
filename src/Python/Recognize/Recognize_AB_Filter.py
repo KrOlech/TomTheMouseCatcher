@@ -9,6 +9,9 @@ class Recognize(Recognize_Abstract):
     lower = np.array([85, 85, 150]) #163 154 29
     upper = np.array([100, 150, 220])#196 255 142
 
+    lower_underPlexy = np.array([0, 0, 210])
+    upper_underPlexy = np.array([110, 25, 250])
+
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
     oldLocation = []
@@ -41,21 +44,46 @@ class Recognize(Recognize_Abstract):
         img_hsv = cv2.cvtColor(dif_RGB, cv2.COLOR_BGR2HSV)
 
         gray = cv2.inRange(img_hsv, self.lower, self.upper)
+        grayUnderPlexy = cv2.inRange(img_hsv, self.lower_underPlexy, self.upper_underPlexy)
 
-        blur = cv2.GaussianBlur(gray, (0, 0), sigmaX=33, sigmaY=33)
+        blureOut = self.__blure(gray)
+        eroded = self.__erode(blureOut)
 
-        divide = cv2.divide(gray, blur, scale=255)
-        out_binary = cv2.threshold(divide, 200, 255, cv2.THRESH_OTSU)[1]
+        blureOutUnderPlexy = self.__blure(grayUnderPlexy)
+        erodedUnderPlexy = self.__erode(blureOutUnderPlexy,1)
 
-        erosion_size = 0
+
+
+
+        return self.__combine(eroded,erodedUnderPlexy)
+    @staticmethod
+    def __combine(image,underPlexy):
+
+        x0, x1, y0, y1 = 190, 1080, 910, 1460
+
+        partOfImage = image[x0:x1,y0:y1]
+        partUnderPlexy = underPlexy[x0:x1,y0:y1]
+        mainCombine = cv2.add(partOfImage, partUnderPlexy)
+
+        image[x0:x1,y0:y1] = mainCombine
+        return image
+
+    @staticmethod
+    def __blure(img):
+        blur = cv2.GaussianBlur(img, (0, 0), sigmaX=33, sigmaY=33)
+
+        # divide
+        divide = cv2.divide(img, blur, scale=255)
+        return cv2.threshold(divide, 200, 255, cv2.THRESH_OTSU)[1]
+
+    @staticmethod
+    def __erode(img,erosion_size=0):
         erosion_shape = cv2.MORPH_ELLIPSE
 
         element = cv2.getStructuringElement(erosion_shape, (2 * erosion_size + 1, 2 * erosion_size + 1),
                                             (erosion_size, erosion_size))
 
-        out_binary = cv2.erode(out_binary, element)
-
-        return out_binary
+        return cv2.erode(img, element)
 
     def __foundContours(self, mask):
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
