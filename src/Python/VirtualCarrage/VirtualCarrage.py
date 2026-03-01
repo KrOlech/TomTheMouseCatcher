@@ -49,11 +49,14 @@ class VirtualCarrage(Loger):
 
     last_status = None
 
-    def advance(self, zoneCords):
-
+    def advanceZoneCords(self,zoneCords):
         x0, y0, w, h = zoneCords
 
-        if self.position < x0 + w / 2 - self.SPEED // 5:
+        self.advance(x0)
+
+    def advance(self, x0):
+
+        if self.position < x0 - self.SPEED // 5:
             # right
             if self.last_status != "right":
                 self.last_status = "right"
@@ -73,7 +76,7 @@ class VirtualCarrage(Loger):
                         self.__arduinoStop()
 
 
-        elif self.position > x0 + w / 2 + self.SPEED // 5:
+        elif self.position > x0 + self.SPEED // 5:
             # left
             if self.last_status != "Left":
                 self.last_status = "Left"

@@ -11,7 +11,7 @@ class Recognize(Recognize_Abstract):
 
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
-    oldLocation = None
+    oldLocation = []
 
     active_zone = -1
 
@@ -96,7 +96,6 @@ class Recognize(Recognize_Abstract):
             return self.oldLocation
 
     def __resolveZoneFromLocation(self, location):
-
 
         for zone_nr in range(self.zones_nr):
             x0, y0, w, h = self.zones[zone_nr]

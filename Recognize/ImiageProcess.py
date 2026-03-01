@@ -307,7 +307,7 @@ class ImageProcess:
 
 if __name__ == '__main__':
 
-    video_path = r"C:\Users\Zenbook\Downloads\m16.avi"
+    #video_path = r"C:\Users\Zenbook\Downloads\m16.avi"
 
     #video_path = r"C:\Users\Zenbook\Downloads\m2_512.avi"
 
@@ -315,7 +315,7 @@ if __name__ == '__main__':
 
     #video_path = r"/home/zenbook/Pobrane/video20260203_11_00_31.avi"
 
-    #video_path = r"C:\Users\Zenbook\Downloads\video20260203_11_00_31.avi"
+    video_path = r"C:\Users\Zenbook\Downloads\video20260203_11_00_31.avi"
 
     imp = ImageProcess(video_path)
 

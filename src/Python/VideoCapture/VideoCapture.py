@@ -164,13 +164,13 @@ class VideoCapture(Loger):
                         cv2.LINE_AA)
 
 
+            self.cross()
             cv2.circle(self.frame, (int(self.rc.px), int(self.rc.py)), 4, (0, 0, 255), -1)
 
-            if lum != -1:
-                self.virtualCarage.advance( self.rc.get_zone_coords(lum))
+            self.virtualCarage.advance(int(self.rc.px))
 
             processing_time = time.time() - self.start_time
-            sleep_time = max(0, self.frame_delay - processing_time)
+            sleep_time = max(0, int(self.frame_delay - processing_time))
             time.sleep(sleep_time)
 
             if self.frame is not None:
@@ -201,6 +201,12 @@ class VideoCapture(Loger):
             self.capt_frames_nr = self.capt_frames_nr + 1
 
             self.active_zone.value = self.rc.active_zone
+
+    def cross(self):
+        if  len(self.rc.oldLocation)==2:
+            x,y = self.rc.oldLocation
+            cv2.line(self.frame, (x-10, y), (x+10, y), (255, 0, 0), 1)
+            cv2.line(self.frame, (x, y-10), (x, y+10), (255, 0, 0), 1)
 
     def releaseCapture(self):
         self.cap.release()

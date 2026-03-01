@@ -8,7 +8,8 @@ FrameHeigth = 1080
 # if provided int number it will connect to usb camera
 # if provided a path to recording it will use that recording instead
 #CamNr = 0
-CamNr = r"C:\Users\Zenbook\Downloads\m16.avi"
+#CamNr = r"C:\Users\Zenbook\Downloads\m16.avi"
+CamNr = r"C:\Users\Zenbook\Downloads\video20260203_11_00_31.avi"
 
 fps = 5
 
@@ -127,10 +128,10 @@ LoopTime = 0.075
 DCntrlTime = 0.1
 
 # Sound file for cue:
-soundFile = "C:\\Users\\kradwanska\\Desktop\\7k_hz.wav"
-soundFile2 = "C:\\Users\\kradwanska\\Desktop\\14k_hz.wav"
-volume1 = 0.28183829312644537
-volume2 = 0.12589254117941673
+soundFile = "C:\\Users\\kradwanska\\Desktop1\\7k_hz.wav"
+soundFile2 = "C:\\Users\\kradwanska\\Desktop1\\14k_hz.wav"
+volume1 = 0#0.28183829312644537
+volume2 = 0#0.12589254117941673
 
 # Trial numbers flag
 MaxTrials = 50
