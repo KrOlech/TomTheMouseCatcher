@@ -25,14 +25,16 @@ class VirtualCarrage(Loger):
 
     oneSteplength = Gear_1_length/OneFullRotation_Steps
 
-    timeGoingLeft = 0
-    timeGoingRight = 0
+    timeGoing_left = 0
+    timeGoing_right = 0
 
     positionMM = 10
 
     safetyDistance = 20 #mm
 
     SPEED_STEPS: int = 500 # ps/s
+    SPEED_STEPS_left: int = -500
+    SPEED_STEPS_right: int = 500
     SPEED: int = SPEED_STEPS*oneSteplength  # m/s
 
     MAZE_LENGTH: float = 1.5  # mm
@@ -54,66 +56,58 @@ class VirtualCarrage(Loger):
 
         self.advance(x0)
 
+    def __movementInDirection(self, direction):
+        if self.last_status != direction:
+            self.last_status = direction
+            self.loger(f"moving virtual carriage to the {direction}")
+            self.__getattribute__(direction)()
+            self.__setattr__('timeGoing_'+direction, time.time())
+
+        else:
+            timeDelta = time.time() - self.__getattribute__('timeGoing_'+direction)
+            self.__setattr__('timeGoing_'+direction, time.time())
+            stepsDone = self.__getattribute__('SPEED_STEPS_'+direction) * timeDelta
+            self.positionMM += self.oneSteplength * stepsDone
+            if self.positionMM > self.MAZE_LENGTH_MM - self.safetyDistance or self.positionMM < self.safetyDistance:
+                self.stop()
+
     def advance(self, x0):
 
-        if self.position < x0 - self.SPEED // 5:
+        tolerance = self.SPEED // 5
+
+        if self.position < x0 - tolerance:
             # right
-            if self.last_status != "right":
-                self.last_status = "right"
-                self.loger("moving virtual carriage to the right")
-                if Settings.arduinoLineCome:
-                    self.__arduinoLeft()
-                self.timeGoingRight = time.time()
-
-            else:
-                timeDelta = time.time() - self.timeGoingRight
-                self.timeGoingRight = time.time()
-                stepsDone = self.SPEED_STEPS * timeDelta
-                self.positionMM += self.oneSteplength*stepsDone
-                if self.positionMM > self.MAZE_LENGTH_MM-self.safetyDistance:
-                    self.loger("Stoping virtual carriage")
-                    if Settings.arduinoLineCome:
-                        self.__arduinoStop()
+            self.__movementInDirection("right")
 
 
-        elif self.position > x0 + self.SPEED // 5:
+        elif self.position > x0 + tolerance:
             # left
-            if self.last_status != "Left":
-                self.last_status = "Left"
-                self.loger("moving virtual carriage to the Left")
-                if Settings.arduinoLineCome:
-                    self.__arduinoLeft()
-                self.timeGoingLeft = time.time()
-            else:
-                timeDelta = time.time() - self.timeGoingLeft
-                self.timeGoingLeft = time.time()
-                stepsDone = self.SPEED_STEPS * timeDelta
-                self.positionMM -= self.oneSteplength * stepsDone
-                if self.positionMM < self.safetyDistance:
-                    self.loger("Stoping virtual carriage")
-                    if Settings.arduinoLineCome:
-                        self.__arduinoStop()
+            self.__movementInDirection("left")
 
         else:
             # stop
             if self.last_status != "stop":
-                self.last_status = "stop"
-                self.loger("Stoping virtual carriage")
-                if Settings.arduinoLineCome:
-                    self.__arduinoStop()
+                self.stop()
 
         self.position = int(self.positionMM*self.MAZE_LENGTH_PIZELS/self.MAZE_LENGTH_MM)
 
+    def stop(self):
+        self.last_status = "stop"
+        self.loger("Stoping virtual carriage")
+        self.__arduinoStop()
+
     def __arduinoStop(self):
         self.__arduinoComand("100","stop")
-    def __arduinoRight(self):
+
+    def right(self):
         self.__arduinoComand("1","right")
 
-    def __arduinoLeft(self):
+    def left(self):
         self.__arduinoComand("-1","left")
 
     def __arduinoComand(self, comand, comandName):
-        self.loger(f"sending {comandName} commend to Arduino")
-        self.arduino.write(bytes(comand, 'utf-8'))
-        self.loger(f"Arduino ack: {self.arduino.readline()}")
+        if Settings.arduinoLineCome:
+            self.loger(f"sending {comandName} commend to Arduino")
+            self.arduino.write(bytes(comand, 'utf-8'))
+            self.loger(f"Arduino ack: {self.arduino.readline()}")
 
