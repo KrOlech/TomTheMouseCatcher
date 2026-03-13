@@ -1,8 +1,18 @@
+import os
+
 import nidaqmx
 
 FrameWidth = 1920
 FrameHeigth = 1080
-CamNr = 0
+
+# if provided int number it will connect to usb camera
+# if provided a path to recording it will use that recording instead
+#CamNr = 0
+#CamNr = r"C:\Users\Zenbook\Downloads\m16.avi"
+CamNr = r"C:\Users\Zenbook\Downloads\video20260203_11_00_31.avi"
+
+fps = 5
+
 minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse
 lightFlash = False  # decision whether light flashes or not
@@ -106,7 +116,7 @@ initDoorsPos["L1"] = 0
 initDoorsPos["L2"] = 0
 
 # Flag for showing zone frames and active/inactive state on videos
-showZones = False
+showZones = True
 
 # Check for value = 0.01 first if the drop forms and stays on the needle (other times to try for water: 0.1, 5% sach: 0.05 and milk: 0.01); 0.003 s yields 10 uL of milk
 LTime1 = 0.25
@@ -118,13 +128,13 @@ LoopTime = 0.075
 DCntrlTime = 0.1
 
 # Sound file for cue:
-soundFile = "C:\\Users\\kradwanska\\Desktop\\7k_hz.wav"
-soundFile2 = "C:\\Users\\kradwanska\\Desktop\\14k_hz.wav"
-volume1 = 0.28183829312644537
-volume2 = 0.12589254117941673
+soundFile = "C:\\Users\\kradwanska\\Desktop1\\7k_hz.wav"
+soundFile2 = "C:\\Users\\kradwanska\\Desktop1\\14k_hz.wav"
+volume1 = 0#0.28183829312644537
+volume2 = 0#0.12589254117941673
 
 # Trial numbers flag
-MaxTrials = 30
+MaxTrials = 50
 
 # Trial sequence flag
 # To randomize the list enter Spyder4 interface and copy the last line of result of code provided below:
@@ -158,3 +168,10 @@ LogicList = [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0
 # LogicList = [1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0] # - 50 trial version randomised 3
 # LogicList = [0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1] # - 50 trial version randomised 4
 # LogicList = [0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0] # - 50 trial version randomised 5
+
+expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
+dataLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\data"
+logLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\log"
+
+arduinoLineCome = None#'COM6'
+baudrate = 9600

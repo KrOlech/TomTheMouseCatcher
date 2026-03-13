@@ -1,181 +1,251 @@
-import numpy as np
-import multiprocessing
-import cv2
-from datetime import datetime
-import time
-import numpy
 import os
+import time
+from datetime import datetime
+from itertools import count
+from copy import deepcopy
+
+import cv2
+import numpy
+
+from src.Python.Loger.Loger import Loger
+from src.Python.Recognize.Recognize_AB_Filter import Recognize
 from src.Python.Settings import Settings
-from src.Python.Recognize.Recognize import Recognize
+from src.Python.VirtualCarrage.VirtualCarrage import VirtualCarrage
 
 
-class VideoCapture:
+class VideoCapture(Loger):
+    calibration = []
+    refCalibration = []
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    org = (100, 23)
+    fontScale = 0.5
+    color = (255, 0, 0)
+    thickness = 1
+
+    last_flagSave = 0
+    current_flagSave = 0
+    saving_started = 0
+    save_calibration = 0
+    zone_active = 0
+    zone_active_last = 0
+    calibration_start = 0
+    calibratedFlag = 0
+
+    messagePrinted: bool = False
+
+    offset_nr = 90
+
+    frame = None  # frame buffer
+    frame_lum = None  # frame buffer
+
+    out = None  # recorder
+
+    windowName: str = "output"
+
+    target_fps = Settings.fps
+    frame_delay = 1.0 / target_fps
+    start_time = 0
 
     def __init__(self, active_zone, recTrigger, finishFlag, which_logic_Set, trial_nr):
-        rc = Recognize(which_logic_Set, trial_nr)
-        self.rc = rc
-        rc.read_zones()
-        self.save_calibration = 0
+
+        self.virtualCarage = VirtualCarrage()
+
+        self.rc = Recognize(which_logic_Set, trial_nr)
+        self.rc.read_zones()
+
+        self.recTrigger = recTrigger
+
         self.active_zone = active_zone
-        zone_active = 0
-        zone_active_last = 0
-        self.calibration_start = 0
-        self.calibratedFlag = 0
-        timeActivated = time.time()
-        self.calibration = []
-        self.refCalibration = []
+
+        self.timeActivated = time.time()
+
         self.finishFlag = finishFlag
         self.which_logic_Set = which_logic_Set
 
-        cap = cv2.VideoCapture(Settings.CamNr)#todo mock of camera
+        self.cap = cv2.VideoCapture(Settings.CamNr)
 
-        self.cap = cap
-
-        i = 0
         self.capt_frames_nr = 0
-        frames = []
-        offset_nr = 90
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        #cv2.startWindowThread()
-        cv2.namedWindow("output", cv2.WND_PROP_VISIBLE)
-        # fourcc = cv2.cv.CV_FOURCC(*'XVID')
-        self.SetCapture()
-        self.last_flagsave = 0
-        self.current_flagsave = 0
+
+        self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        cv2.startWindowThread()
+        cv2.namedWindow(self.windowName, cv2.WINDOW_NORMAL)
+
+        self.setCapture()
+
+        self.runCaptureTryExcept()
+
+    def runCaptureTryExcept(self):
+        try:
+            self.runCapture()
+        except Exception as e:
+            self.logError(e)
+        else:
+            self.rc.finish()
+        finally:
+            self.releaseCapture()
+
+    def runCapture(self):
+        self.runVideoCaptureSavingFrames()
+        self.out.release()
         self.saving_started = 0
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        org = (100, 23)
-        fontScale = 0.5
-        color = (255, 0, 0)
-        thickness = 1
+        self.loger("STOP SAVING")
 
-        while True:
-            # Capture frame-by-frame
-            ret, frame = cap.read()
-            frames.append(frame)
-            self.frame_lum = frame[:, :, 0]
 
-            i = i + 1
-            now = datetime.now()
-            frame = cv2.putText(frame, str(now), org, font,
-                                fontScale, color, thickness, cv2.LINE_AA)
+    def captureFrame(self):
+        self.start_time = time.time()
+        ret, frame = self.cap.read()
+        self.frame_lum = frame
+        self.rowFrame = deepcopy(frame)
+        now = datetime.now()
+        self.frame = cv2.putText(frame, str(now), self.org, self.font, self.fontScale, self.color, self.thickness,
+                                 cv2.LINE_AA)
 
-            if i <= offset_nr:
+
+    def startRecording(self):
+        if not self.last_flagSave and self.current_flagSave:
+            self.saving_started = True
+            self.out = cv2.VideoWriter(datetime.now().strftime(f"{os.path.expanduser('~')}\\Documents\\TOM\\data\\video%Y%m%d_%H_%M_%S") + ".avi", self.fourcc,
+                                       20.0, (self.rowFrame.shape[1], self.rowFrame.shape[0]))
+            self.loger("START RECORDING")
+
+    def runVideoCaptureSavingFrames(self):
+        sleep_time =0
+        for i in count(0):
+
+            self.captureFrame()
+
+            if i <= self.offset_nr:
                 continue
-            recTrigger.set()
-            if recTrigger.is_set():
-                self.current_flagsave = 1
+
+            self.recTrigger.set()
+
+            if self.recTrigger.is_set():
+                self.current_flagSave = 1
             else:
-                self.current_flagsave = 0
+                self.current_flagSave = 0
 
-            # CALIBRATE
-            self.Calibrate()
+            self.calibrate()
 
-            # START SAVING
-            if (self.last_flagsave == 0) & (self.current_flagsave == 1):
-                self.saving_started = 1
-                now = datetime.now()
-                fname = now.strftime(".\\data\\video%Y%m%d_%H_%M_%S") + ".avi"
-                out = cv2.VideoWriter(fname, fourcc, 20.0, (frame.shape[1], frame.shape[0]))
-                print("START SAVING")
-            if Settings.showZones == False:
-                if self.saving_started == 1:
-                    out.write(frame)
+            self.startRecording()
 
-            # Display the resulting frame
-            frames.pop(0)
-            if recTrigger.is_set():
+            if self.saving_started:
+                self.out.write(self.rowFrame)
+
+            if self.recTrigger.is_set():
                 if self.calibratedFlag == 0:
-                    cv2.circle(frame, (30, 17), 10, (0, 0, 255), -1)
+                    cv2.circle(self.frame, (30, 17), 10, (0, 0, 255), -1)
                 else:
-                    cv2.circle(frame, (30, 17), 10, (0, 255, 0), -1)
-            if (self.calibratedFlag == 1):
-                lum = (rc.get_active_zone(self.frame_lum))
+                    cv2.circle(self.frame, (30, 17), 10, (0, 255, 0), -1)
+
+            if self.calibratedFlag == 1:
+                lum = self.rc.get_active_zone(self.frame_lum)
             else:
                 lum = -1
-            # print ("ref expo=",numpy.mean(frame_lum[y0:y0+h,x0:x0+w]))
-            zone_active_last = zone_active
 
-            for zone_nr in range(rc.zones_nr):
-                x0, y0, w, h = rc.get_zone_coords(zone_nr)
-                if (lum == zone_nr):
-                    cv2.rectangle(frame, (x0, y0), (x0 + w, y0 + h), (0, 0, 250), 2)
+            self.zone_active_last = self.zone_active
+
+            for zone_nr in range(self.rc.zones_nr):
+                x0, y0, w, h = self.rc.get_zone_coords(zone_nr)
+                if lum == zone_nr:
+                    cv2.rectangle(self.frame, (x0, y0), (x0 + w, y0 + h), (0, 0, 250), 2)
                 else:
-                    cv2.rectangle(frame, (x0, y0), (x0 + w, y0 + h), (0, 200, 0), 2)
-            if Settings.showZones == True:
-                if self.saving_started == 1:
-                    out.write(frame)
+                    cv2.rectangle(self.frame, (x0, y0), (x0 + w, y0 + h), (0, 200, 0), 2)
 
-            if self.save_calibration:
-                self.save_calibration = 0
-                cv2.imwrite("self.calibration.jpg", frame)
-            # if (zone_active_last>zone_active):
-            #	print ("ZONE DEACTIVATED AFTER ",time.time()-timeActivated)
-            # if (zone_active_last<zone_active):
-            #	print ("ZONE ACTIVATED")
-            #	timeActivated=time.time()
-            rc.check_zone_change()
-            cv2.imshow('output', frame)
-            # print (self.last_flagsave,self.current_flagsave)
+            if Settings.showZones and self.saving_started:
+                self.out.write(self.rowFrame)
+
+            self.rc.check_zone_change()
+
+            cv2.rectangle(self.frame, (self.virtualCarage.position - 10, 480 - 10),
+                          (self.virtualCarage.position + 10, 480 + 10), (200, 0, 0), -1)
+
+            cv2.putText(self.frame, str(self.virtualCarage.positionMM), (self.virtualCarage.position + 10, 480 + 10), self.font, self.fontScale, self.color, self.thickness,
+                        cv2.LINE_AA)
+
+
+            self.cross()
+            cv2.circle(self.frame, (int(self.rc.px), int(self.rc.py)), 4, (0, 0, 255), -1)
+
+            self.virtualCarage.advance(int(self.rc.px))
+
+            processing_time = time.time() - self.start_time
+            sleep_time = max(0, int(self.frame_delay - processing_time))
+            time.sleep(sleep_time)
+
+            if self.frame is not None:
+                cv2.imshow(self.windowName, self.frame)
+
             # STOP SAVING
-            if (self.last_flagsave == 1) & (self.current_flagsave == 0):
-                out.release()
+            if self.last_flagSave and not self.current_flagSave:
+                self.out.release()
                 self.saving_started = 0
-                print("STOP SAVING")
+                self.loger("STOP SAVING")
 
-            self.last_flagsave = self.current_flagsave
+            self.last_flagSave = self.current_flagSave
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if (cv2.waitKey(1) and 0xFF == ord('q')) or self.finishFlag.is_set():
+                self.finishFlag.set()
+                self.out.release()
+                self.saving_started = 0
+                self.loger("STOP SAVING")
                 break
+
+            if cv2.getWindowProperty(self.windowName, cv2.WND_PROP_VISIBLE) < 1:
+                self.finishFlag.set()
+                self.out.release()
+                self.saving_started = 0
+                self.loger("STOP SAVING")
+                break
+
             self.capt_frames_nr = self.capt_frames_nr + 1
-            # print ("lum=",lum)
-            self.active_zone.value = rc.active_zone
 
-            if self.finishFlag.is_set():
-                break
-        # When everything done, release the capture
-        self.RelaseCapture()
-		
-    def RelaseCapture(self):
+            self.active_zone.value = self.rc.active_zone
+
+    def cross(self):
+        if  len(self.rc.oldLocation)==2:
+            x,y = self.rc.oldLocation
+            cv2.line(self.frame, (x-10, y), (x+10, y), (255, 0, 0), 1)
+            cv2.line(self.frame, (x, y-10), (x, y+10), (255, 0, 0), 1)
+
+    def releaseCapture(self):
         self.cap.release()
         cv2.destroyAllWindows()
-        self.rc.finish()
 
-    def SetCapture(self):
+    def setCapture(self):
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, Settings.FrameWidth)
-        # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, Settings.FrameHeigth)
-        # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
         self.ret_val, self.cap_for_exposure = self.cap.read()
-        # cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 3) # auto mode
+
         self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)  # manual mode
 
-    def Calibrate(self):
-        if (self.capt_frames_nr == 10):
-            # cap.set(cv2.CAP_PROP_EXPOSURE,16)	
-            print("Starting calibration...")
+    def calibrate(self):
+        if self.capt_frames_nr == 1:
+            self.rc.set_ref_image(self.frame_lum)
+
+        if self.capt_frames_nr == 10:
+            self.loger("Starting calibration...")
             self.calibration_start = 20
+
         if self.calibration_start > 0:
-            self.calibration.append(self.frame_lum.copy())
-            # print ("fl=",(frame_lum[y0:y0+h,x0:x0+w])[0:100,2])
-            # print ("C0=",(self.calibration[0])[y0:y0+h,x0:x0+w][0:100,2])
-            # print ("a=",frame_lum)
-            # print ("b=",self.calibration[0])
-            # print ("ref expo=",numpy.mean(frame_lum[y0:y0+h,x0:x0+w]))
+            self.calibration.append(cv2.cvtColor(self.frame_lum, cv2.COLOR_RGB2GRAY).copy())
             self.refCalibration = numpy.mean(self.calibration, axis=0)
-            # print (self.refCalibration.shape)
-            # if (self.calibration_start==18):
-            #	print ("c0=",(self.calibration[0])[y0:y0+h,x0:x0+w][0:100,2],"c1=",(self.calibration[1])[y0:y0+h,x0:x0+w][0:100,2])
-            #	os._exit(0)
-            # diff=numpy.mean(numpy.subtract(self.frame_lum[y0:y0+h,x0:x0+w],self.refCalibration[y0:y0+h,x0:x0+w]))
-            # print ("diff=",diff)
-            self.refCalibration = numpy.mean(self.calibration, axis=0)
-            self.rc.set_ref_image(self.refCalibration)
-            # print ((frame_lum[y0:y0+h,x0:x0+w])[0:100,2],(self.refCalibration[y0:y0+h,x0:x0+w])[0:100,2])
-            if self.calibration_start == 1:
+            #self.rc.set_ref_image(self.frame_lum)
+            #todo proper calibration for new recognize
+            #self.rc.set_ref_image(self.refCalibration) #old save image for old recognize
+
+            if self.calibration_start:
                 self.refCalibration = numpy.mean(self.calibration, axis=0)
                 self.calibratedFlag = 1
-                print("calibration finished...")
+
                 self.save_calibration = 1
 
             self.calibration_start = self.calibration_start - 1
+
+        if self.calibratedFlag and not self.messagePrinted:
+            self.messagePrinted = True
+            self.loger("calibration finished")
+
+        if self.save_calibration:
+            self.save_calibration = 0
+            cv2.imwrite(f"{Settings.dataLocation}\\self.calibration.jpg", self.frame)

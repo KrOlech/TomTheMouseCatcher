@@ -1,0 +1,61 @@
+<circuit version="1.1.0-SR1" rev="2005" stepSize="1000000" stepsPS="10000" NLsteps="100000" reaStep="1000000" animate="0" >
+
+<item itemtype="Subcircuit" CircId="Nano-1" mainComp="false" Show_id="true" Show_Val="false" Pos="4,20" rotation="180" hflip="1" vflip="1" label="Nano-1" idLabPos="0,-20" labelrot="0" valLabPos="-16,20" valLabRot="0">
+<mainCompProps MainCompId="m328 TQFP-269" Frequency="16 MHz" Program="../../../AppData/Local/arduino/sketches/79DA15B7F5DB220941C7F2C9DF39D995/LineCatcher.ino.hex" Auto_Load="false" saveEepr="true" MainMcu="true" SerialMon="-1" />
+</item>
+
+<item itemtype="Led" CircId="Led-2" mainComp="false" Show_id="false" Show_Val="false" Pos="140,76" rotation="0" hflip="1" vflip="1" label="Led-2" idLabPos="-16,-24" labelrot="0" valLabPos="-16,20" valLabRot="0" Color="Yellow" Grounded="false" Threshold="2.4 V" MaxCurrent="30 mA" Resistance="0.6 Ω" />
+
+<item itemtype="Led" CircId="Led-3" mainComp="false" Show_id="false" Show_Val="false" Pos="140,100" rotation="0" hflip="1" vflip="1" label="Led-3" idLabPos="-16,-24" labelrot="0" valLabPos="-16,20" valLabRot="0" Color="Yellow" Grounded="false" Threshold="2.4 V" MaxCurrent="30 mA" Resistance="0.6 Ω" />
+
+<item itemtype="Led" CircId="Led-4" mainComp="false" Show_id="false" Show_Val="false" Pos="176,-32" rotation="0" hflip="1" vflip="1" label="Led-4" idLabPos="-16,-24" labelrot="0" valLabPos="-16,20" valLabRot="0" Color="Yellow" Grounded="false" Threshold="2.4 V" MaxCurrent="30 mA" Resistance="0.6 Ω" />
+
+<item itemtype="Led" CircId="Led-5" mainComp="false" Show_id="false" Show_Val="false" Pos="140,124" rotation="0" hflip="1" vflip="1" label="Led-5" idLabPos="-16,-24" labelrot="0" valLabPos="-16,20" valLabRot="0" Color="Yellow" Grounded="false" Threshold="2.4 V" MaxCurrent="30 mA" Resistance="0.6 Ω" />
+
+<item itemtype="Resistor" CircId="Resistor-12" mainComp="false" ShowProp="Resistance" Show_id="false" Show_Val="true" Pos="176,156" rotation="0" hflip="1" vflip="1" label="Resistor-12" idLabPos="-16,-24" labelrot="0" valLabPos="-14.5294,6" valLabRot="0" Resistance="220 Ω" />
+
+<item itemtype="Ground" CircId="Ground-13" mainComp="false" Show_id="false" Show_Val="false" Pos="204,188" rotation="0" hflip="1" vflip="1" label="Ground-13" idLabPos="-16,8" labelrot="0" valLabPos="-16,20" valLabRot="0" />
+
+<item itemtype="SerialTerm" CircId="SerialTerm-15" mainComp="false" Show_id="false" Show_Val="false" Pos="116,160" rotation="0" hflip="1" vflip="1" label="SerialTerm-15" idLabPos="-20,-32" labelrot="0" valLabPos="-16,20" valLabRot="0" Baudrate="9600 _Bd" DataBits="8 _bits" StopBits="1 _bits" SerialMon="false" />
+
+<item itemtype="Oscope" CircId="Oscope-16" mainComp="false" Show_id="false" Show_Val="false" Pos="76,-76" rotation="0" hflip="1" vflip="1" label="Oscope-16" idLabPos="-90,-100" labelrot="0" valLabPos="-16,20" valLabRot="0" Basic_X="135 _px" Basic_Y="135 _px" BufferSize="600000" connectGnd="true" InputImped="10 MΩ" TimDiv="1000000000" TimPos="0,0,0,0," VolDiv="1,1,1,1," Tunnels=",,,," Trigger="4" Filter="0.1 V" AutoSC="4" Tracks="1" HideCh="false,false,false,false," VolPos="0,0,0,0," />
+
+<item itemtype="Node" CircId="Node-10" mainComp="false" Pos="156,100" />
+
+<item itemtype="Node" CircId="Node-14" mainComp="false" Pos="156,124" />
+
+<item itemtype="Node" CircId="Node-17" mainComp="false" Pos="156,76" />
+
+<item itemtype="Node" CircId="Node-18" mainComp="false" Pos="124,100" />
+
+<item itemtype="Connector" uid="Connector-1" startpinid="Nano-1-2" endpinid="Led-5-lPin" pointList="60,124,124,124" />
+
+<item itemtype="Connector" uid="Connector-13" startpinid="Nano-1-4" endpinid="Led-2-lPin" pointList="60,108,116,108,116,76,124,76" />
+
+<item itemtype="Connector" uid="Connector-17" startpinid="Node-10-2" endpinid="Led-3-rPin" pointList="156,100,156,100" />
+
+<item itemtype="Connector" uid="Connector-22" startpinid="Node-14-1" endpinid="Resistor-12-lPin" pointList="156,124,156,156,160,156" />
+
+<item itemtype="Connector" uid="Connector-23" startpinid="Node-10-1" endpinid="Node-14-0" pointList="156,100,160,100,160,124,156,124" />
+
+<item itemtype="Connector" uid="Connector-24" startpinid="Node-14-2" endpinid="Led-5-rPin" pointList="156,124,156,124" />
+
+<item itemtype="Connector" uid="Connector-25" startpinid="Resistor-12-rPin" endpinid="Ground-13-Gnd" pointList="192,156,204,156,204,172" />
+
+<item itemtype="Connector" uid="Connector-26" startpinid="Nano-1-1" endpinid="SerialTerm-15-pin1" pointList="60,156,92,156,92,168" />
+
+<item itemtype="Connector" uid="Connector-27" startpinid="Nano-1-0" endpinid="SerialTerm-15-pin0" pointList="60,148,92,148,92,152" />
+
+<item itemtype="Connector" uid="Connector-28" startpinid="Node-17-1" endpinid="Oscope-16-PinG" pointList="156,76,156,-12,-12,-12" />
+
+<item itemtype="Connector" uid="Connector-29" startpinid="Led-2-rPin" endpinid="Node-17-0" pointList="156,76,156,76" />
+
+<item itemtype="Connector" uid="Connector-30" startpinid="Node-17-2" endpinid="Node-10-0" pointList="156,76,156,100" />
+
+<item itemtype="Connector" uid="Connector-31" startpinid="Node-18-1" endpinid="Oscope-16-Pin3" pointList="124,100,124,-28,-12,-28" />
+
+<item itemtype="Connector" uid="Connector-32" startpinid="Nano-1-3" endpinid="Node-18-0" pointList="60,116,124,116,124,100" />
+
+<item itemtype="Connector" uid="Connector-33" startpinid="Node-18-2" endpinid="Led-3-lPin" pointList="124,100,124,100" />
+
+</circuit>
