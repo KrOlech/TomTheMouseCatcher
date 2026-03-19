@@ -32,9 +32,9 @@ class VirtualCarrage(Loger):
 
     safetyDistance = 20 #mm
 
-    SPEED_STEPS: int = 500 # ps/s
-    SPEED_STEPS_left: int = -500
-    SPEED_STEPS_right: int = 500
+    SPEED_STEPS: int = 325 # ps/s
+    SPEED_STEPS_left: int = -SPEED_STEPS
+    SPEED_STEPS_right: int = SPEED_STEPS
     SPEED: int = SPEED_STEPS*oneSteplength  # m/s
 
     MAZE_LENGTH: float = 1.5  # mm
