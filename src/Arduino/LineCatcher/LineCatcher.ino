@@ -2,6 +2,8 @@
 #define X_STEP_PIN 3//6//4  //B6 or A1
 #define X_DIR_PIN 2//7//5   //B5 or A2
 
+//C:\Users\Zenbook\AppData\Local\arduino\sketches\79DA15B7F5DB220941C7F2C9DF39D995
+
 void setup() {
 Serial.begin(9600);
 
@@ -11,7 +13,7 @@ pinMode(X_EN_PIN, OUTPUT);
 
 digitalWrite(X_EN_PIN, HIGH);
 
-analogWrite(X_STEP_PIN,127);
+analogWrite(X_STEP_PIN,128);
 }
 
 String ver = "1.3";
