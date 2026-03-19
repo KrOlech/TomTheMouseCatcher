@@ -13,10 +13,9 @@ pinMode(X_EN_PIN, OUTPUT);
 
 digitalWrite(X_EN_PIN, HIGH);
 
-analogWrite(X_STEP_PIN,128);
 }
 
-String ver = "1.3";
+String ver = "1.4";
 
 void loop() {
   String readString = "";
@@ -48,4 +47,9 @@ void loop() {
       digitalWrite(X_EN_PIN, HIGH);
       Serial.println("stop "+ver);
   }
+
+  digitalWrite(X_STEP_PIN, HIGH);
+  delay(2);
+  digitalWrite(X_STEP_PIN, LOW);
+  delay(1);
 }
