@@ -1,24 +1,30 @@
-import os
 from inspect import stack
 import sys
 from datetime import datetime
 
-from src.Python.Settings import Settings
 
+class LogerUni:
 
-class Loger:
+    PROGRAM_NAME = ""
+    Program_VERSION = ""
+    LogLocation = ""
 
     def logStart(self):
-        self._logImportant(" Program Starting ", (41, 42))
-        self._logImportant(" Program V1.1.1.4 ", (41, 42))
+        self._logImportant(f" Starting Program {self.PROGRAM_NAME} ", (41, 42))
+        self._logImportant(f" Program Version {self.Program_VERSION} ", (41, 42))
 
     def logEnd(self):
         self._logImportant(" Program Stoping ", (41, 42))
 
     def _logImportant(self, mesage, offset=(42, 42)):
-        self.loger("#" * 100)
-        self.loger("#" * offset[0] + mesage + "#" * offset[1])
-        self.loger("#" * 100)
+        lenMesage = len(mesage)
+
+        non = 101 if lenMesage % 2 else 100
+        offset = int((non - lenMesage) / 2)
+
+        self.loger("#" * non)
+        self.loger("#" * offset + mesage + "#" * offset)
+        self.loger("#" * non)
 
     def loger(self, *message):
         self.__log(*message, state="log")
@@ -54,9 +60,9 @@ class Loger:
 
         Loger.__saveToFile(info)
 
-    @staticmethod
-    def __saveToFile(info):
-        with open(f"{Settings.logLocation}\\{datetime.now().day}-{datetime.now().month}-{datetime.now().year}.log", "a") as file:
+    @classmethod
+    def __saveToFile(cls,info):
+        with open(f"{cls.LogLocation}\\{datetime.now().day}-{datetime.now().month}-{datetime.now().year}.log", "a") as file:
             file.write(info + "\n")
 
     @staticmethod

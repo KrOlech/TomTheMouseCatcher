@@ -1,23 +1,22 @@
 import os
 import shutil
+from abc import ABC, abstractmethod
 
-from src.Python.Loger.Loger import Loger
-from src.Python.Settings import Settings
+class SetupUni(ABC):
 
-
-class Setup(Loger):
+    def __init__(self, loger):
+        self.logingApp = loger
 
     def ensure_dir(self, path):
         if not os.path.exists(path):
             os.makedirs(path)
-            self.loger(f"Created directory: {path}")
+            self.logingApp.loger(f"Created directory: {path}")
 
     def copy_file(self, src, dst):
         self.ensure_dir(os.path.dirname(dst))
         shutil.copy2(src, dst)
-        self.loger(f"Copied {src} to {dst}")
+        self.logingApp.loger(f"Copied {src} to {dst}")
 
+    @abstractmethod
     def setUp(self):
-        self.ensure_dir(Settings.dataLocation)
-        self.ensure_dir(Settings.expectedLocation)
-        self.ensure_dir(Settings.logLocation)
+        ...
