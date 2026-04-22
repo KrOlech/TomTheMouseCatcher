@@ -109,5 +109,14 @@ class VirtualCarrage(Loger):
         if Settings.arduinoLineCome:
             self.loger(f"sending {comandName} commend to Arduino")
             self.arduino.write(bytes(comand, 'utf-8'))
-            self.loger(f"Arduino ack: {self.arduino.readline()}")
+            arduinoAck = self.arduino.readline().decode("utf-8")
+            self.loger(f"Arduino ack: {arduinoAck}")
+            if 'end' in arduinoAck:
+                if 'left' in arduinoAck:
+                    self.position = self.MAZE_LENGTH_PIZELS
+                    self.positionMM = self.MAZE_LENGTH_MM
+                else:
+                    self.position = 0
+                    self.positionMM = 0
+
 
