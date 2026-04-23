@@ -1,6 +1,6 @@
 #define X_EN_PIN  4
-#define X_STEP_PIN 5
-#define X_DIR_PIN 6
+#define X_STEP_PIN 6
+#define X_DIR_PIN 5
 
 #define L_END_STOP_PIN 2
 #define R_END_STOP_PIN 3
@@ -25,11 +25,18 @@ pinMode(R_END_STOP_PIN, INPUT_PULLUP);
 attachInterrupt(digitalPinToInterrupt(L_END_STOP_PIN), r_interupt, FALLING);
 attachInterrupt(digitalPinToInterrupt(R_END_STOP_PIN), l_interupt, FALLING);
 
+
+digitalWrite(X_DIR_PIN, LOW);
+digitalWrite(X_EN_PIN, LOW);
 }
 
 String ver = "2.0";
 
+bool in_init = false;
+
 void loop() {
+
+  if (in_init){
   String readString = "";
 
   while (Serial.available()) {
@@ -65,13 +72,12 @@ void loop() {
       digitalWrite(X_EN_PIN, HIGH);
       Serial.println("stop "+ver);
   }
-
+    }
   performStep();
 }
 
 void r_interupt(){
   digitalWrite(X_DIR_PIN, LOW);
-  performTenSteps();
   rightEnd = true;
   Serial.println("R stop "+ver);
   handle_interupt();
@@ -79,18 +85,19 @@ void r_interupt(){
 
 void l_interupt(){
   digitalWrite(X_DIR_PIN, HIGH);
-  performTenSteps();
   leftEnd = true;
+    in_init = true;
   Serial.println("L stop "+ver);
   handle_interupt();
 }
 
 void handle_interupt(){
+  //performTenSteps();
   digitalWrite(X_EN_PIN, HIGH);
 }
 
 void performTenSteps(){
-  for(int i=0;i<10;i++){
+  for(int i=0;i<100;i++){
     performStep();
   }
 }
