@@ -22,8 +22,8 @@ digitalWrite(X_EN_PIN, HIGH);
 pinMode(L_END_STOP_PIN, INPUT_PULLUP);
 pinMode(R_END_STOP_PIN, INPUT_PULLUP);
 
-attachInterrupt(digitalPinToInterrupt(L_END_STOP_PIN), r_interupt, CHANGE);
-attachInterrupt(digitalPinToInterrupt(R_END_STOP_PIN), l_interupt, CHANGE);
+attachInterrupt(digitalPinToInterrupt(L_END_STOP_PIN), r_interupt, FALLING);
+attachInterrupt(digitalPinToInterrupt(R_END_STOP_PIN), l_interupt, FALLING);
 
 }
 
@@ -66,22 +66,38 @@ void loop() {
       Serial.println("stop "+ver);
   }
 
+  performStep();
+}
+
+void r_interupt(){
+  digitalWrite(X_DIR_PIN, LOW);
+  performTenSteps();
+  rightEnd = true;
+  Serial.println("R stop "+ver);
+  handle_interupt();
+}
+
+void l_interupt(){
+  digitalWrite(X_DIR_PIN, HIGH);
+  performTenSteps();
+  leftEnd = true;
+  Serial.println("L stop "+ver);
+  handle_interupt();
+}
+
+void handle_interupt(){
+  digitalWrite(X_EN_PIN, HIGH);
+}
+
+void performTenSteps(){
+  for(int i=0;i<10;i++){
+    performStep();
+  }
+}
+
+void performStep(){
   digitalWrite(X_STEP_PIN, HIGH);
   delay(2);
   digitalWrite(X_STEP_PIN, LOW);
   delay(1);
-}
-
-void r_interupt(){
-handle_interupt();
-    rightEnd = true;
-}
-
-void l_interupt(){
-handle_interupt();
-    leftEnd = true;
-}Ł
-
-void handle_interupt(){
-digitalWrite(X_EN_PIN, HIGH);
 }
