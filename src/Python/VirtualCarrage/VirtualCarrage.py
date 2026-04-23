@@ -112,11 +112,10 @@ class VirtualCarrage(Loger):
             arduinoAck = self.arduino.readline().decode("utf-8")
             self.loger(f"Arduino ack: {arduinoAck}")
             if 'end' in arduinoAck:
+                self.last_status = "stop"
                 if 'left' in arduinoAck:
-                    self.position = 0
-                    self.positionMM = 0
+                    self.positionMM = self.safetyDistance
                 else:
-                    self.position = self.MAZE_LENGTH_PIZELS
-                    self.positionMM = self.MAZE_LENGTH_MM
+                    self.positionMM = self.MAZE_LENGTH_MM - self.safetyDistance
 
 

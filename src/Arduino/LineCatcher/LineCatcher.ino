@@ -77,29 +77,18 @@ void loop() {
 }
 
 void r_interupt(){
-  digitalWrite(X_DIR_PIN, LOW);
   rightEnd = true;
-  Serial.println("R stop "+ver);
   handle_interupt();
 }
 
 void l_interupt(){
-  digitalWrite(X_DIR_PIN, HIGH);
   leftEnd = true;
-    in_init = true;
-  Serial.println("L stop "+ver);
+  in_init = true;
   handle_interupt();
 }
 
 void handle_interupt(){
-  //performTenSteps();
   digitalWrite(X_EN_PIN, HIGH);
-}
-
-void performTenSteps(){
-  for(int i=0;i<100;i++){
-    performStep();
-  }
 }
 
 void performStep(){
