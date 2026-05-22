@@ -25,12 +25,15 @@ pinMode(R_END_STOP_PIN, INPUT_PULLUP);
 attachInterrupt(digitalPinToInterrupt(L_END_STOP_PIN), r_interupt, FALLING);
 attachInterrupt(digitalPinToInterrupt(R_END_STOP_PIN), l_interupt, FALLING);
 
+attachInterrupt(digitalPinToInterrupt(L_END_STOP_PIN), r_interupt_dBounce, RISING);
+attachInterrupt(digitalPinToInterrupt(R_END_STOP_PIN), l_interupt_dBounce, RISING);
+
 
 digitalWrite(X_DIR_PIN, LOW);
 digitalWrite(X_EN_PIN, LOW);
 }
 
-String ver = "2.0";
+String ver = "2.1";
 
 bool in_init = false;
 
@@ -78,6 +81,7 @@ void loop() {
 
 void r_interupt(){
   rightEnd = true;
+    in_init = true;
   handle_interupt();
 }
 
@@ -85,6 +89,14 @@ void l_interupt(){
   leftEnd = true;
   in_init = true;
   handle_interupt();
+}
+
+void l_interupt_dBounce(){
+  leftEnd = false;
+}
+
+void r_interupt_dBounce(){
+  rightEnd = false;
 }
 
 void handle_interupt(){

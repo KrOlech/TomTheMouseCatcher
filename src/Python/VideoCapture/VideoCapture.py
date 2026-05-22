@@ -167,6 +167,8 @@ class VideoCapture(Loger):
             self.cross()
             cv2.circle(self.frame, (int(self.rc.px), int(self.rc.py)), 4, (0, 0, 255), -1)
 
+            self.logPositionData((self.rc.px, self.rc.py), self.rc.oldLocation)
+
             self.virtualCarage.advance(int(self.rc.px))
 
             processing_time = time.time() - self.start_time
