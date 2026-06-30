@@ -7,23 +7,41 @@ from src.Python.Recognize.Recognize_Abstract import Recognize_Abstract
 
 
 class Recognize(Recognize_Abstract):
-    # mask
-    lower = np.array([85, 85, 150]) #163 154 29
-    upper = np.array([100, 150, 220])#196 255 142
 
-    lower_underPlexy = np.array([0, 0, 210])
-    upper_underPlexy = np.array([110, 25, 250])
+
 
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
     oldLocation = []
 
-
-
     px, py = 0.0, 500.0
     vx, vy = 0.0, 0.0
 
     start_time = time.time()
+
+    plexyMask = False
+
+    def __init__(self, mainMask, area, aspect, plexyMask=None, ogDifferents=True, erosion_size=0, yBound=None):
+
+        if yBound is None:
+            yBound = []
+        self.lower = mainMask[0]
+        self.upper = mainMask[1]
+
+        self.area = area
+        self.aspect = aspect
+
+        if plexyMask is not None:
+            self.lower_underPlexy =plexyMask[0]
+            self.upper_underPlexy =plexyMask[1]
+            self.plexyMask = True
+
+        self.ogDifferents = ogDifferents
+
+        self.erosion_size = erosion_size
+
+        self.yBound = yBound
+
 
     def get_location(self, img_RGB):
 
@@ -37,23 +55,25 @@ class Recognize(Recognize_Abstract):
 
     def __maskTheImage(self, img_RGB):
 
-        dif_RGB = img_RGB -self.ref_image
+        if self.ogDifferents:
+            dif_RGB = img_RGB -self.ref_image
+        else:
+            dif_RGB = img_RGB
 
         img_hsv = cv2.cvtColor(dif_RGB, cv2.COLOR_BGR2HSV)
 
         gray = cv2.inRange(img_hsv, self.lower, self.upper)
-        grayUnderPlexy = cv2.inRange(img_hsv, self.lower_underPlexy, self.upper_underPlexy)
 
         blureOut = self.__blure(gray)
-        eroded = self.__erode(blureOut)
+        eroded = self.__erode(blureOut, erosion_size=self.erosion_size)
 
-        blureOutUnderPlexy = self.__blure(grayUnderPlexy)
-        erodedUnderPlexy = self.__erode(blureOutUnderPlexy,1)
-
-
-
-
-        return self.__combine(eroded,erodedUnderPlexy)
+        if self.plexyMask:
+            grayUnderPlexy = cv2.inRange(img_hsv, self.lower_underPlexy, self.upper_underPlexy)
+            blureOutUnderPlexy = self.__blure(grayUnderPlexy)
+            erodedUnderPlexy = self.__erode(blureOutUnderPlexy, 1)
+            return self.__combine(eroded,erodedUnderPlexy)
+        else:
+            return eroded
 
     @staticmethod
     def __combine(image,underPlexy):
@@ -95,19 +115,24 @@ class Recognize(Recognize_Abstract):
         if contours:
             for cnt in contours:
                 area = cv2.contourArea(cnt)
-                if not (400 < area < 5500):
+                if not (self.area[0] < area < self.area[1]):
                     continue
 
                 xm, y, w, h = cv2.boundingRect(cnt)
                 aspect = w / h
-                if not (0.25 < aspect < 3.3):
+                if not (self.aspect[0] < aspect < self.aspect[1]):
                     continue
 
                 M = cv2.moments(cnt)
                 if M["m00"] != 0:
                     cx = int(M["m10"] / M["m00"])
                     cy = int(M["m01"] / M["m00"])
-                    locations.append((cx, cy))
+
+                    if self.yBound:
+                        if (self.yBound[0]<cy<self.yBound[1]):
+                            locations.append((cx, cy))
+                    else:
+                        locations.append((cx, cy))
 
         if len(locations) == 0:
             return [self.px, self.py]

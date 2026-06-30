@@ -11,8 +11,8 @@ class VirtualCarrage(Loger):
 
     OneFullRotation_Steps:int = 200
 
-    Gear_1_cog_count:int = 80
-    Gear_2_cog_count:int = 10
+    Gear_1_cog_count:int = 120
+    Gear_2_cog_count:int = 20
 
     Gear_dif: float = Gear_1_cog_count / Gear_2_cog_count
 
@@ -45,6 +45,8 @@ class VirtualCarrage(Loger):
     SPEED_PIXELS: int = int(MAZE_LENGTH_PIZELS * SPEED / MAZE_LENGTH_MM)
     last_status = ""
 
+    timeGoing_ = 0
+
     def __init__(self):
         if Settings.arduinoLineCome:
             self.arduino = serial.Serial(port=Settings.arduinoLineCome, baudrate=Settings.baudrate, timeout=.1)
@@ -74,16 +76,20 @@ class VirtualCarrage(Loger):
                 self.stop()
 
 
-    def advance(self, x0):
+    def advance(self, x0, c0):
 
-        tolerance = self.SPEED // 5
+        tolerance = 25
 
-        if self.position < x0 - tolerance:
+        self.loger(f"calculated position is: {self.position} detected position is {c0} delta of them is {self.position - c0} ")
+        self.loger(
+            f"calculated mouse position is: {x0} delta to carriage position is {x0 - c0} ")
+
+        if c0 < x0 - tolerance:
             # right
             self.__movementInDirection("right")
 
 
-        elif self.position > x0 + tolerance:
+        elif c0 > x0 + tolerance:
             # left
             self.__movementInDirection("left")
 

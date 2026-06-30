@@ -7,11 +7,13 @@ FrameHeigth = 1080
 
 # if provided int number it will connect to usb camera
 # if provided a path to recording it will use that recording instead
-#CamNr = 0
+CamNr = 0
 #CamNr = r"C:\Users\kradwanska\Desktop\m1.avi"
-CamNr = r"C:\Users\Zenbook\Documents\TOM\NagraniaTestowe\m16.avi"
+#CamNr = r"C:\Users\Zenbook\Documents\TOM\NagraniaTestowe\m16.avi"
+#CamNr = r"C:\Users\Zenbook\Downloads\video20260630_10_42_40.avi"
 
-fps = 20
+
+fps = 60
 
 minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse

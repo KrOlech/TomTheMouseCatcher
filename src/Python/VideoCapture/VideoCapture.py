@@ -5,7 +5,7 @@ from itertools import count
 from copy import deepcopy
 
 import cv2
-import numpy
+import numpy as np
 
 from src.Python.Loger.Loger import Loger
 from src.Python.Recognize.Recognize_AB_Filter import Recognize
@@ -55,7 +55,17 @@ class VideoCapture(Loger):
         self.zon = Zones(which_logic_Set, trial_nr)
         self.zon.read_zones()
 
-        self.rcMouse = Recognize()
+        mouseMainMask = [np.array([85, 85, 150]),np.array([100, 150, 220])]
+        mousePlexyMask = [np.array([0, 0, 210]),np.array([110, 25, 250])]
+        mouseArea = [400, 5500]
+        mouseAspect = [0.25, 3.3]
+        self.rcMouse = Recognize(mouseMainMask,mouseArea,mouseAspect, mousePlexyMask)
+
+        carriageMainMask = [np.array([0, int(255 * 0.25), int(255 * 0.9)]),np.array([25, int(255 * 0.45), 255])]
+        carriageArea = [400, 5500]
+        carriageAspect = [0.5, 1.5]
+        carriage_yBound = [450,650]
+        self.rcCarriage = Recognize(carriageMainMask, carriageArea, carriageAspect, ogDifferents=False, erosion_size= 5, yBound=carriage_yBound)
 
         self.recTrigger = recTrigger
 
@@ -143,6 +153,7 @@ class VideoCapture(Loger):
 
             if self.calibratedFlag == 1:
                 lum = self.zon.get_active_zone(self.rcMouse.get_location(self.frame_lum))
+                self.rcCarriage.get_location(self.frame_lum)
             else:
                 lum = -1
 
@@ -172,7 +183,10 @@ class VideoCapture(Loger):
 
             self.logPositionData((self.rcMouse.px, self.rcMouse.py), self.rcMouse.oldLocation)
 
-            self.virtualCarage.advance(int(self.rcMouse.px))
+            cv2.circle(self.frame, (int(self.rcCarriage.px), int(self.rcCarriage.py)), 4, (0, 255, 0), -1)
+
+
+            self.virtualCarage.advance(int(self.rcMouse.px), int(self.rcCarriage.px))
 
             processing_time = time.time() - self.start_time
             sleep_time = max(0, int(self.frame_delay - processing_time))
@@ -213,6 +227,11 @@ class VideoCapture(Loger):
             cv2.line(self.frame, (x-10, y), (x+10, y), (255, 0, 0), 1)
             cv2.line(self.frame, (x, y-10), (x, y+10), (255, 0, 0), 1)
 
+        if  len(self.rcCarriage.oldLocation)==2:
+            x,y = self.rcCarriage.oldLocation
+            cv2.line(self.frame, (x-10, y), (x+10, y), (0, 255, 0), 1)
+            cv2.line(self.frame, (x, y-10), (x, y+10), (0, 255, 0), 1)
+
     def releaseCapture(self):
         self.cap.release()
         cv2.destroyAllWindows()
@@ -234,13 +253,13 @@ class VideoCapture(Loger):
 
         if self.calibration_start > 0:
             self.calibration.append(cv2.cvtColor(self.frame_lum, cv2.COLOR_RGB2GRAY).copy())
-            self.refCalibration = numpy.mean(self.calibration, axis=0)
+            self.refCalibration = np.mean(self.calibration, axis=0)
             #self.zon.set_ref_image(self.frame_lum)
             #todo proper calibration for new recognize
             #self.zon.set_ref_image(self.refCalibration) #old save image for old recognize
 
             if self.calibration_start:
-                self.refCalibration = numpy.mean(self.calibration, axis=0)
+                self.refCalibration = np.mean(self.calibration, axis=0)
                 self.calibratedFlag = 1
 
                 self.save_calibration = 1
