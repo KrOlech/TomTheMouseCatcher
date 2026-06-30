@@ -11,6 +11,7 @@ from src.Python.Loger.Loger import Loger
 from src.Python.Recognize.Recognize_AB_Filter import Recognize
 from src.Python.Settings import Settings
 from src.Python.VirtualCarrage.VirtualCarrage import VirtualCarrage
+from src.Python.Zones.Zones import Zones
 
 
 class VideoCapture(Loger):
@@ -51,8 +52,10 @@ class VideoCapture(Loger):
 
         self.virtualCarage = VirtualCarrage()
 
-        self.rc = Recognize(which_logic_Set, trial_nr)
-        self.rc.read_zones()
+        self.zon = Zones(which_logic_Set, trial_nr)
+        self.zon.read_zones()
+
+        self.rcMouse = Recognize()
 
         self.recTrigger = recTrigger
 
@@ -81,7 +84,7 @@ class VideoCapture(Loger):
         except Exception as e:
             self.logError(e)
         else:
-            self.rc.finish()
+            self.zon.finish()
         finally:
             self.releaseCapture()
 
@@ -139,14 +142,14 @@ class VideoCapture(Loger):
                     cv2.circle(self.frame, (30, 17), 10, (0, 255, 0), -1)
 
             if self.calibratedFlag == 1:
-                lum = self.rc.get_active_zone(self.frame_lum)
+                lum = self.zon.get_active_zone(self.rcMouse.get_location(self.frame_lum))
             else:
                 lum = -1
 
             self.zone_active_last = self.zone_active
 
-            for zone_nr in range(self.rc.zones_nr):
-                x0, y0, w, h = self.rc.get_zone_coords(zone_nr)
+            for zone_nr in range(self.zon.zones_nr):
+                x0, y0, w, h = self.zon.get_zone_coords(zone_nr)
                 if lum == zone_nr:
                     cv2.rectangle(self.frame, (x0, y0), (x0 + w, y0 + h), (0, 0, 250), 2)
                 else:
@@ -155,7 +158,7 @@ class VideoCapture(Loger):
             if Settings.showZones and self.saving_started:
                 self.out.write(self.rowFrame)
 
-            self.rc.check_zone_change()
+            self.zon.check_zone_change()
 
             cv2.rectangle(self.frame, (self.virtualCarage.position - 10, 480 - 10),
                           (self.virtualCarage.position + 10, 480 + 10), (200, 0, 0), -1)
@@ -165,11 +168,11 @@ class VideoCapture(Loger):
 
 
             self.cross()
-            cv2.circle(self.frame, (int(self.rc.px), int(self.rc.py)), 4, (0, 0, 255), -1)
+            cv2.circle(self.frame, (int(self.rcMouse.px), int(self.rcMouse.py)), 4, (0, 0, 255), -1)
 
-            self.logPositionData((self.rc.px, self.rc.py), self.rc.oldLocation)
+            self.logPositionData((self.rcMouse.px, self.rcMouse.py), self.rcMouse.oldLocation)
 
-            self.virtualCarage.advance(int(self.rc.px))
+            self.virtualCarage.advance(int(self.rcMouse.px))
 
             processing_time = time.time() - self.start_time
             sleep_time = max(0, int(self.frame_delay - processing_time))
@@ -202,11 +205,11 @@ class VideoCapture(Loger):
 
             self.capt_frames_nr = self.capt_frames_nr + 1
 
-            self.active_zone.value = self.rc.active_zone
+            self.active_zone.value = self.zon.active_zone
 
     def cross(self):
-        if  len(self.rc.oldLocation)==2:
-            x,y = self.rc.oldLocation
+        if  len(self.rcMouse.oldLocation)==2:
+            x,y = self.rcMouse.oldLocation
             cv2.line(self.frame, (x-10, y), (x+10, y), (255, 0, 0), 1)
             cv2.line(self.frame, (x, y-10), (x, y+10), (255, 0, 0), 1)
 
@@ -223,7 +226,7 @@ class VideoCapture(Loger):
 
     def calibrate(self):
         if self.capt_frames_nr == 1:
-            self.rc.set_ref_image(self.frame_lum)
+            self.rcMouse.set_ref_image(self.frame_lum)
 
         if self.capt_frames_nr == 10:
             self.loger("Starting calibration...")
@@ -232,9 +235,9 @@ class VideoCapture(Loger):
         if self.calibration_start > 0:
             self.calibration.append(cv2.cvtColor(self.frame_lum, cv2.COLOR_RGB2GRAY).copy())
             self.refCalibration = numpy.mean(self.calibration, axis=0)
-            #self.rc.set_ref_image(self.frame_lum)
+            #self.zon.set_ref_image(self.frame_lum)
             #todo proper calibration for new recognize
-            #self.rc.set_ref_image(self.refCalibration) #old save image for old recognize
+            #self.zon.set_ref_image(self.refCalibration) #old save image for old recognize
 
             if self.calibration_start:
                 self.refCalibration = numpy.mean(self.calibration, axis=0)

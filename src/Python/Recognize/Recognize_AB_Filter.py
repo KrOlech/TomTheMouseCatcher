@@ -1,8 +1,10 @@
-import numpy as np
-import cv2
-from src.Python.Recognize.Recognize_Abstract import Recognize_Abstract
-from src.Python.Settings import Settings
 import time
+
+import cv2
+import numpy as np
+
+from src.Python.Recognize.Recognize_Abstract import Recognize_Abstract
+
 
 class Recognize(Recognize_Abstract):
     # mask
@@ -16,14 +18,14 @@ class Recognize(Recognize_Abstract):
 
     oldLocation = []
 
-    active_zone = -1
+
 
     px, py = 0.0, 500.0
     vx, vy = 0.0, 0.0
 
     start_time = time.time()
 
-    def get_active_zone(self, img_RGB):
+    def get_location(self, img_RGB):
 
         mask = self.__maskTheImage(img_RGB)
 
@@ -31,11 +33,7 @@ class Recognize(Recognize_Abstract):
 
         location = self.__resolveLocationFromConturs(contours)
 
-        correctedLocation = self.__predictPosition(location)
-
-        zone = self.__resolveZoneFromLocation(correctedLocation)
-
-        return zone
+        return self.__predictPosition(location)
 
     def __maskTheImage(self, img_RGB):
 
@@ -56,6 +54,7 @@ class Recognize(Recognize_Abstract):
 
 
         return self.__combine(eroded,erodedUnderPlexy)
+
     @staticmethod
     def __combine(image,underPlexy):
 
@@ -85,7 +84,8 @@ class Recognize(Recognize_Abstract):
 
         return cv2.erode(img, element)
 
-    def __foundContours(self, mask):
+    @staticmethod
+    def __foundContours(mask):
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         return contours
 
@@ -122,16 +122,6 @@ class Recognize(Recognize_Abstract):
                         in locations]
             self.oldLocation = locations[np.argmin(sqDeltas)]
             return self.oldLocation
-
-    def __resolveZoneFromLocation(self, location):
-
-        for zone_nr in range(self.zones_nr):
-            x0, y0, w, h = self.zones[zone_nr]
-            if x0 < location[0] < x0 + w and y0 < location[1] < y0 + h:
-                self.active_zone = zone_nr
-                break
-
-        return self.active_zone
 
     def __predictPosition(self, location):
 
