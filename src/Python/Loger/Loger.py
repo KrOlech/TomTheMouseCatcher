@@ -10,7 +10,7 @@ class Loger:
 
     def logStart(self):
         self._logImportant(" Program Starting ", (41, 42))
-        self._logImportant(" Program V1.1.1.4 ", (41, 42))
+        self._logImportant(" Program V1.1.2.4 ", (41, 42))
         self._logImportant(" Program Starting ", (41, 42), 'positions-')
         self.__log(" (Filtr X, Filtr Y) (Detected X, Detected Y)")
     def logEnd(self):
