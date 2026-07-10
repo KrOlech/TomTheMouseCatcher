@@ -37,6 +37,8 @@ String ver = "2.2";
 
 bool in_init = false;
 
+int currentDirection = 1;
+
 void loop() {
 
   if (in_init){
@@ -56,6 +58,7 @@ void loop() {
   //left
     digitalWrite(X_EN_PIN, LOW);
     changeDirection(LOW);
+    currentDirection = -1;
     Serial.println("left "+ver);
     rightEnd = false;
 
@@ -65,6 +68,7 @@ void loop() {
     //right
       digitalWrite(X_EN_PIN, LOW);
       changeDirection(HIGH);
+      currentDirection = 1;
       Serial.println("right "+ver);
       leftEnd = false;
 
@@ -72,6 +76,8 @@ void loop() {
     Serial.println("right end "+ver);
   } else if (direction == 100){
   //stop
+      slowDown();
+      currentDirection = 100;
       digitalWrite(X_EN_PIN, HIGH);
       Serial.println("stop "+ver);
   }
@@ -81,7 +87,7 @@ void loop() {
 
 void r_interupt(){
   rightEnd = true;
-    in_init = true;
+  in_init = true;
   handle_interupt();
 }
 
@@ -111,7 +117,9 @@ void performStep(){
 }
 
 void changeDirection(bool direction){
-    slowDown();
+    if (currentDirection != 100){
+        slowDown();
+    }
     digitalWrite(X_DIR_PIN, direction);
     speedUp();
 }
