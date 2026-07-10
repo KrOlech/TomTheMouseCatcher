@@ -10,7 +10,6 @@ import Settings
 from VideoCapture import VideoCapture
 from Zones import Zones
 from MainLoop_HabituationDD1 import MainLoop  # Line to choose the logic: from (insert logic name) import MainLoop
-from DoorControl import DoorControl
 
 
 class EMaze(MainLoop):
@@ -24,22 +23,23 @@ class EMaze(MainLoop):
         self.trial_nr = multiprocessing.Value('i', 0)
         self.active_zone = multiprocessing.Value('i', 0)
         self.zone_names = Zones(self.which_logic_Set, self.trial_nr).get_zone_names()
-        self.door_names = DoorControl.getDoorNames()
+        self.door_names = sorted(Settings.doors)
         e = multiprocessing.Event()
         self.finishFlag = multiprocessing.Event()
 
         self.door_status = multiprocessing.Array('i', numpy.zeros(nr_of_doors, dtype=numpy.uint))
         self.light_status = multiprocessing.Array('i', numpy.zeros(4, dtype=numpy.uint))
-        i = 0
-        p = multiprocessing.Process(target=VideoCapture,
-                                    args=(self.active_zone, e, self.finishFlag, self.which_logic_Set, self.trial_nr))
+
+        self.vCapture = VideoCapture(self.active_zone, e, self.finishFlag, self.which_logic_Set, self.trial_nr)
+
+        p = multiprocessing.Process(target=self.vCapture.runCaptureTryExcept)
         p.start()
-        dc = multiprocessing.Process(target=DoorControl, args=(self.door_status, self.light_status, self.finishFlag,))
-        dc.start()
+        #dc = multiprocessing.Process(target=DoorControl, args=(self.door_status, self.light_status, self.finishFlag,))
+        #dc.start()
         self.MainLoop()
 
     def _getDoorIndex(self, door_name):
-        return (DoorControl.getDoorIndex(door_name, self.door_names))
+        return self.door_names.index(door_name)
 
     def CloseDoor(self, name):
         door_index = self._getDoorIndex(name)

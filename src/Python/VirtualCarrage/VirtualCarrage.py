@@ -80,9 +80,9 @@ class VirtualCarrage(Loger):
 
         tolerance = 25
 
-        self.loger(f"calculated position is: {self.position} detected position is {c0} delta of them is {self.position - c0} ")
-        self.loger(
-            f"calculated mouse position is: {x0} delta to carriage position is {x0 - c0} ")
+        #self.loger(f"calculated position is: {self.position} detected position is {c0} delta of them is {self.position - c0} ")
+        #self.loger(
+        #    f"calculated mouse position is: {x0} delta to carriage position is {x0 - c0} ")
 
         if c0 < x0 - tolerance:
             # right

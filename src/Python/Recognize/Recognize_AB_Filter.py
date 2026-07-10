@@ -2,6 +2,7 @@ import time
 
 import cv2
 import numpy as np
+from itertools import count
 
 from src.Python.Recognize.Recognize_Abstract import Recognize_Abstract
 
@@ -21,15 +22,16 @@ class Recognize(Recognize_Abstract):
 
     plexyMask = False
 
-    def __init__(self, mainMask, area, aspect, plexyMask=None, ogDifferents=True, erosion_size=0, yBound=None):
+    def __init__(self, mainMask, area, aspect, frameQue=None, locationQue=None, plexyMask=None, ogDifferents=True, erosion_size=0, yBound=None):
 
-        if yBound is None:
-            yBound = []
         self.lower = mainMask[0]
         self.upper = mainMask[1]
 
         self.area = area
         self.aspect = aspect
+
+        self.frameQue = frameQue
+        self.locationQue = locationQue
 
         if plexyMask is not None:
             self.lower_underPlexy =plexyMask[0]
@@ -39,6 +41,9 @@ class Recognize(Recognize_Abstract):
         self.ogDifferents = ogDifferents
 
         self.erosion_size = erosion_size
+
+        if yBound is None:
+            yBound = []
 
         self.yBound = yBound
 
@@ -52,6 +57,10 @@ class Recognize(Recognize_Abstract):
         location = self.__resolveLocationFromConturs(contours)
 
         return self.__predictPosition(location)
+
+    def getLocationsSeparateThread(self):
+        for i in count(0):
+            self.locationQue.put(self.get_location(self.frameQue.get()))
 
     def __maskTheImage(self, img_RGB):
 
@@ -89,11 +98,11 @@ class Recognize(Recognize_Abstract):
 
     @staticmethod
     def __blure(img):
-        blur = cv2.GaussianBlur(img, (0, 0), sigmaX=33, sigmaY=33)
+        #blur = cv2.GaussianBlur(img, (0, 0), sigmaX=33, sigmaY=33)
 
         # divide
-        divide = cv2.divide(img, blur, scale=255)
-        return cv2.threshold(divide, 200, 255, cv2.THRESH_OTSU)[1]
+        #divide = cv2.divide(img, blur, scale=255)
+        return img#cv2.threshold(divide, 200, 255, cv2.THRESH_OTSU)[1]
 
     @staticmethod
     def __erode(img,erosion_size=0):

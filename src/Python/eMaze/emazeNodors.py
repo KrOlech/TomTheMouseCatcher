@@ -5,6 +5,7 @@ from src.Python.VideoCapture.VideoCapture import VideoCapture
 from src.Python.eMaze.apstract import EMazeAbstract
 
 
+
 class EMazeNoDoors(EMazeAbstract):
 
     def CloseDoor(self, name):
@@ -22,10 +23,10 @@ class EMazeNoDoors(EMazeAbstract):
     def __init__(self):
         super(EMazeNoDoors, self).__init__()
 
-        self.p = multiprocessing.Process(target=VideoCapture,
-                                         args=(
-                                             self.active_zone, multiprocessing.Event(), self.finishFlag,
-                                             self.which_logic_Set, self.trial_nr))
+        vCapture = VideoCapture(self.active_zone, multiprocessing.Event(), self.finishFlag,
+                                             self.which_logic_Set, self.trial_nr)
+
+        self.p = multiprocessing.Process(target=vCapture.runCaptureTryExcept())
 
     def run(self):
         self.p.start()
