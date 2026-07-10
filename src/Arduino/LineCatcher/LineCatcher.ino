@@ -33,7 +33,7 @@ digitalWrite(X_DIR_PIN, LOW);
 digitalWrite(X_EN_PIN, LOW);
 }
 
-String ver = "2.1";
+String ver = "2.2";
 
 bool in_init = false;
 
@@ -54,8 +54,8 @@ void loop() {
 
   if (direction == -1 && !leftEnd){
   //left
-    digitalWrite(X_DIR_PIN, LOW);
     digitalWrite(X_EN_PIN, LOW);
+    changeDirection(LOW);
     Serial.println("left "+ver);
     rightEnd = false;
 
@@ -63,8 +63,8 @@ void loop() {
     Serial.println("left end "+ver);
   } else if(direction == 1 && !rightEnd){
     //right
-      digitalWrite(X_DIR_PIN, HIGH);
       digitalWrite(X_EN_PIN, LOW);
+      changeDirection(HIGH);
       Serial.println("right "+ver);
       leftEnd = false;
 
@@ -108,4 +108,28 @@ void performStep(){
   delay(2);
   digitalWrite(X_STEP_PIN, LOW);
   delay(1);
+}
+
+void changeDirection(bool direction){
+    slowDown();
+    digitalWrite(X_DIR_PIN, direction);
+    speedUp();
+}
+
+void slowDown(){
+    for(int i=0; i<10;i++){
+      digitalWrite(X_STEP_PIN, HIGH);
+      delay(2+i);
+      digitalWrite(X_STEP_PIN, LOW);
+      delay(1+i);
+    }
+}
+
+void speedUp(){
+    for(int i=10; i>0;i--){
+      digitalWrite(X_STEP_PIN, HIGH);
+      delay(2+i);
+      digitalWrite(X_STEP_PIN, LOW);
+      delay(1+i);
+    }
 }
