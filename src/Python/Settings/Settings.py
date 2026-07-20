@@ -8,8 +8,8 @@ FrameHeigth = 1080
 # if provided int number it will connect to usb camera
 # if provided a path to recording it will use that recording instead
 #CamNr = 0
-#CamNr = r"C:\Users\kradwanska\Desktop\m1.avi"
-CamNr = r"C:\Users\Zenbook\Documents\TOM\NagraniaTestowe\m16.avi"
+CamNr = r"C:\Users\kradwanska\Desktop\m1.avi"
+#CamNr = r"C:\Users\Zenbook\Downloads\video20260203_11_00_31.avi"
 
 fps = 20
 
@@ -173,5 +173,5 @@ expectedLocation = r"C:\Program Files\TOM\Config\PyGameAssets\Sound"
 dataLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\data"
 logLocation = f"{os.path.expanduser('~')}\\Documents\\TOM\\log"
 
-arduinoLineCome = None
+arduinoLineCome = 'COM3'
 baudrate = 9600

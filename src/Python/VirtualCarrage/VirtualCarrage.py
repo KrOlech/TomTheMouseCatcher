@@ -43,12 +43,13 @@ class VirtualCarrage(Loger):
     MAZE_LENGTH_PIZELS: int = 1920
 
     SPEED_PIXELS: int = int(MAZE_LENGTH_PIZELS * SPEED / MAZE_LENGTH_MM)
-    last_status = ""
+
 
     def __init__(self):
         if Settings.arduinoLineCome:
             self.arduino = serial.Serial(port=Settings.arduinoLineCome, baudrate=Settings.baudrate, timeout=.1)
 
+    last_status = None
 
     def advanceZoneCords(self,zoneCords):
         x0, y0, w, h = zoneCords
@@ -57,9 +58,6 @@ class VirtualCarrage(Loger):
 
     def __movementInDirection(self, direction):
         if self.last_status != direction:
-            if self.last_status in ["left", "right"]:
-                timeDelta = time.time() - self.__getattribute__('timeGoing_' + self.last_status)
-                self.loger(f"virtual carriage was going for {timeDelta} in {self.last_status}")
             self.last_status = direction
             self.loger(f"moving virtual carriage to the {direction}")
             self.__getattribute__(direction)()
@@ -72,7 +70,6 @@ class VirtualCarrage(Loger):
             self.positionMM += self.oneSteplength * stepsDone
             if self.positionMM > self.MAZE_LENGTH_MM - self.safetyDistance or self.positionMM < self.safetyDistance:
                 self.stop()
-
 
     def advance(self, x0):
 
@@ -95,12 +92,9 @@ class VirtualCarrage(Loger):
         self.position = int(self.positionMM*self.MAZE_LENGTH_PIZELS/self.MAZE_LENGTH_MM)
 
     def stop(self):
-        lstemp = self.last_status
         self.last_status = "stop"
         self.loger("Stoping virtual carriage")
         self.__arduinoStop()
-        timeDelta = time.time() - self.__getattribute__('timeGoing_' + lstemp)
-        self.loger(f"virtual carriage was going for {timeDelta} in {lstemp}")
 
     def __arduinoStop(self):
         self.__arduinoComand("100","stop")
