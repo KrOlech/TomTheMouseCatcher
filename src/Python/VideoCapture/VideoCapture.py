@@ -169,9 +169,10 @@ class VideoCapture(Loger):
 
             self.virtualCarage.advance(int(self.rc.px))
 
-            processing_time = time.time() - self.start_time
-            sleep_time = max(0, int(self.frame_delay - processing_time))
-            time.sleep(sleep_time)
+            #processing_time = time.time() - self.start_time
+            #print(processing_time)
+            #sleep_time = max(0, int(self.frame_delay - processing_time))
+            #time.sleep(sleep_time)
 
             if self.frame is not None:
                 cv2.imshow(self.windowName, self.frame)

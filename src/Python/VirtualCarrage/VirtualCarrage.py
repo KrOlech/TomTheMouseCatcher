@@ -11,7 +11,7 @@ class VirtualCarrage(Loger):
 
     OneFullRotation_Steps:int = 200
 
-    Gear_1_cog_count:int = 80
+    Gear_1_cog_count:int = 150
     Gear_2_cog_count:int = 10
 
     Gear_dif: float = Gear_1_cog_count / Gear_2_cog_count

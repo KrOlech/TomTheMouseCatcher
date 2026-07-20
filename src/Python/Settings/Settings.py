@@ -7,17 +7,20 @@ FrameHeigth = 1080
 
 # if provided int number it will connect to usb camera
 # if provided a path to recording it will use that recording instead
-#CamNr = 0
-CamNr = r"C:\Users\kradwanska\Desktop\m1.avi"
-#CamNr = r"C:\Users\Zenbook\Downloads\video20260203_11_00_31.avi"
+CamNr = 0
+#CamNr = r"C:\Users\kradwanska\Desktop\m1.avi"
+#CamNr = r"C:\Users\kradwanska\Documents\TOM\data\video20260605_14_22_45.avi"
+#CamNr = r"C:\Users\Zenbook\Documents\TOM\NagraniaTestowe\m16.avi"
+#CamNr = r"C:\Users\Zenbook\Downloads\video20260630_10_42_40.avi"
 
-fps = 20
+
+fps = 60
 
 minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse
 lightFlash = False  # decision whether light flashes or not
 lightFlash_step = 0  # how fast light flashes (s)
-lightFlashEXC = [1, 2, 3, 4]  # number of lights that should not be flashing
+lightFlashEXC = [1, 2, 3, 4]  # number of lights that s#hould not be flashing
 
 # Zone coordinates (DO NOT EDIT)
 
@@ -128,10 +131,10 @@ LoopTime = 0.075
 DCntrlTime = 0.1
 
 # Sound file for cue:
-soundFile = "C:\\Users\\kradwanska\\Desktop1\\7k_hz.wav"
-soundFile2 = "C:\\Users\\kradwanska\\Desktop1\\14k_hz.wav"
-volume1 = 0#0.28183829312644537
-volume2 = 0#0.12589254117941673
+soundFile = "C:\\Users\\kradwanska\\Desktop\\7k_hz.wav"
+soundFile2 = "C:\\Users\\kradwanska\\Desktop\\14k_hz.wav"
+volume1 = 0.28183829312644537
+volume2 = 0.12589254117941673
 
 # Trial numbers flag
 MaxTrials = 50
