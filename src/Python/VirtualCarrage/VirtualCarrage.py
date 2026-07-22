@@ -52,10 +52,10 @@ class VirtualCarrage(Loger):
             self.arduino = serial.Serial(port=Settings.arduinoLineCome, baudrate=Settings.baudrate, timeout=.1)
 
 
-    def advanceZoneCords(self,zoneCords):
-        x0, y0, w, h = zoneCords
+    #def advanceZoneCords(self,zoneCords, ):
+    #    x0, y0, w, h = zoneCords
 
-        self.advance(x0)
+    #    self.advance(x0)
 
     def __movementInDirection(self, direction):
         if self.last_status != direction:
@@ -78,11 +78,20 @@ class VirtualCarrage(Loger):
 
     def advance(self, x0, c0):
 
-        tolerance = 25
+        x0 = int(x0/0.5)
+        c0 = int(c0/0.5)
 
-        self.loger(f"calculated position is: {self.position} detected position is {c0} delta of them is {self.position - c0} ")
-        self.loger(
-            f"calculated mouse position is: {x0} delta to carriage position is {x0 - c0} ")
+        x = c0-(1920/2)
+        xn = x/(1920/2)
+
+        px_delta = 300
+
+        c0 =int(c0 - xn*px_delta)
+
+        tolerance = 50
+
+        #self.loger(f"calculated position is: {self.position} detected position is {c0} delta of them is {self.position - c0} ")
+        #self.loger(f"calculated mouse position is: {x0} delta to carriage position is {x0 - c0} ")
 
         if c0 < x0 - tolerance:
             # right
@@ -98,7 +107,7 @@ class VirtualCarrage(Loger):
             if self.last_status != "stop":
                 self.stop()
 
-        self.position = int(self.positionMM*self.MAZE_LENGTH_PIZELS/self.MAZE_LENGTH_MM)
+        self.position = c0 #int(self.positionMM*self.MAZE_LENGTH_PIZELS/self.MAZE_LENGTH_MM)
 
     def stop(self):
         lstemp = self.last_status

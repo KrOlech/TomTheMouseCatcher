@@ -163,7 +163,7 @@ class Zones(Loger):
                 self.number_in_zones_TRIAL[k] = 0
 
     def get_active_zone(self, correctedLocation):
-
+        correctedLocation = int(correctedLocation[0]//0.5), int(correctedLocation[1]//0.5)
         return self.__resolveZoneFromLocation(correctedLocation)
 
     def __resolveZoneFromLocation(self, location):

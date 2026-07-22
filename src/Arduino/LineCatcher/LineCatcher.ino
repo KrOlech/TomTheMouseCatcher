@@ -5,6 +5,8 @@
 #define L_END_STOP_PIN 2
 #define R_END_STOP_PIN 3
 
+#define accelerationTime 4
+
 //C:\Users\Zenbook\AppData\Local\arduino\sketches\79DA15B7F5DB220941C7F2C9DF39D995
 
 bool rightEnd = false;
@@ -25,8 +27,8 @@ pinMode(R_END_STOP_PIN, INPUT_PULLUP);
 attachInterrupt(digitalPinToInterrupt(L_END_STOP_PIN), r_interupt, FALLING);
 attachInterrupt(digitalPinToInterrupt(R_END_STOP_PIN), l_interupt, FALLING);
 
-attachInterrupt(digitalPinToInterrupt(L_END_STOP_PIN), r_interupt_dBounce, RISING);
-attachInterrupt(digitalPinToInterrupt(R_END_STOP_PIN), l_interupt_dBounce, RISING);
+//attachInterrupt(digitalPinToInterrupt(L_END_STOP_PIN), r_interupt_dBounce, RISING);
+//attachInterrupt(digitalPinToInterrupt(R_END_STOP_PIN), l_interupt_dBounce, RISING);
 
 
 digitalWrite(X_DIR_PIN, LOW);
@@ -125,7 +127,7 @@ void changeDirection(bool direction){
 }
 
 void slowDown(){
-    for(int i=0; i<10;i++){
+    for(int i=0; i<accelerationTime;i++){
       digitalWrite(X_STEP_PIN, HIGH);
       delay(2+i);
       digitalWrite(X_STEP_PIN, LOW);
@@ -134,7 +136,7 @@ void slowDown(){
 }
 
 void speedUp(){
-    for(int i=10; i>0;i--){
+    for(int i=accelerationTime; i>0;i--){
       digitalWrite(X_STEP_PIN, HIGH);
       delay(2+i);
       digitalWrite(X_STEP_PIN, LOW);

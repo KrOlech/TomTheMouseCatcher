@@ -2,7 +2,7 @@ import os
 import time
 from datetime import datetime
 from itertools import count
-from copy import deepcopy
+#from copy import deepcopy
 
 import cv2
 import numpy as np
@@ -49,6 +49,8 @@ class VideoCapture(Loger):
     start_time = 0
 
     def __init__(self, active_zone, recTrigger, finishFlag, which_logic_Set, trial_nr):
+        self.frames = 0
+        self.start = time.time()
 
         self.virtualCarage = VirtualCarrage()
 
@@ -57,15 +59,15 @@ class VideoCapture(Loger):
 
         mouseMainMask = [np.array([85, 85, 150]),np.array([100, 150, 220])]
         mousePlexyMask = [np.array([0, 0, 210]),np.array([110, 25, 250])]
-        mouseArea = [400, 5500]
+        mouseArea = [int(400*0.25), int(5500*0.25)]
         mouseAspect = [0.25, 3.3]
         self.rcMouse = Recognize(mouseMainMask,mouseArea,mouseAspect, mousePlexyMask)
 
         carriageMainMask = [np.array([0, int(255 * 0.25), int(255 * 0.9)]),np.array([25, int(255 * 0.45), 255])]
-        carriageArea = [400, 5500]
-        carriageAspect = [0.5, 1.5]
-        carriage_yBound = [450,650]
-        self.rcCarriage = Recognize(carriageMainMask, carriageArea, carriageAspect, ogDifferents=False, erosion_size= 5, yBound=carriage_yBound)
+        carriageArea = [int(400*0.25), int(5500*0.25)]
+        carriageAspect = [0.5, 1.8]
+        carriage_yBound = [int(450*0.5), int(650*0.5)]
+        self.rcCarriage = Recognize(carriageMainMask, carriageArea, carriageAspect, ogDifferents=False, erosion_size= 2, yBound=carriage_yBound)
 
         self.recTrigger = recTrigger
 
@@ -104,16 +106,38 @@ class VideoCapture(Loger):
         self.saving_started = 0
         self.loger("STOP SAVING")
 
-
     def captureFrame(self):
         self.start_time = time.time()
-        ret, frame = self.cap.read()
-        self.frame_lum = frame
-        self.rowFrame = deepcopy(frame)
-        now = datetime.now()
-        self.frame = cv2.putText(frame, str(now), self.org, self.font, self.fontScale, self.color, self.thickness,
-                                 cv2.LINE_AA)
 
+        ret, frame = self.cap.read()
+
+        if not ret or frame is None:
+            raise RuntimeError("Could not read a frame from the camera or video.")
+
+        self.rowFrame = frame.copy()
+
+        processing_scale = 0.5
+
+        self.frame_lum  = cv2.resize(
+            frame,
+            None,
+            fx=processing_scale,
+            fy=processing_scale,
+            interpolation=cv2.INTER_AREA
+        )
+
+        now = datetime.now()
+
+        self.frame = cv2.putText(
+            frame,
+            str(now),
+            self.org,
+            self.font,
+            self.fontScale,
+            self.color,
+            self.thickness,
+            cv2.LINE_AA
+        )
 
     def startRecording(self):
         if not self.last_flagSave and self.current_flagSave:
@@ -123,7 +147,6 @@ class VideoCapture(Loger):
             self.loger("START RECORDING")
 
     def runVideoCaptureSavingFrames(self):
-        sleep_time =0
         for i in count(0):
 
             self.captureFrame()
@@ -142,8 +165,6 @@ class VideoCapture(Loger):
 
             self.startRecording()
 
-            if self.saving_started:
-                self.out.write(self.rowFrame)
 
             if self.recTrigger.is_set():
                 if self.calibratedFlag == 0:
@@ -166,8 +187,6 @@ class VideoCapture(Loger):
                 else:
                     cv2.rectangle(self.frame, (x0, y0), (x0 + w, y0 + h), (0, 200, 0), 2)
 
-            if Settings.showZones and self.saving_started:
-                self.out.write(self.rowFrame)
 
             self.zon.check_zone_change()
 
@@ -179,20 +198,30 @@ class VideoCapture(Loger):
 
 
             self.cross()
-            cv2.circle(self.frame, (int(self.rcMouse.px), int(self.rcMouse.py)), 4, (0, 0, 255), -1)
+            cv2.circle(self.frame, (int(self.rcMouse.px//0.5), int(self.rcMouse.py//0.5)), 4, (0, 0, 255), -1)
 
-            self.logPositionData((self.rcMouse.px, self.rcMouse.py), self.rcMouse.oldLocation)
+            #self.logPositionData((self.rcMouse.px, self.rcMouse.py), self.rcMouse.oldLocation)
 
-            cv2.circle(self.frame, (int(self.rcCarriage.px), int(self.rcCarriage.py)), 4, (0, 255, 0), -1)
+
+
+
+            cv2.circle(self.frame, (int(self.rcCarriage.px//0.5), int(self.rcCarriage.py//0.5)), 4, (0, 255, 0), -1)
 
 
             self.virtualCarage.advance(int(self.rcMouse.px), int(self.rcCarriage.px))
 
             processing_time = time.time() - self.start_time
-            sleep_time = max(0, int(self.frame_delay - processing_time))
+            #sleep_time = max(0, int(self.frame_delay - processing_time))
+            #time.sleep(sleep_time)
+            sleep_time = max(0.0, self.frame_delay - processing_time)
             time.sleep(sleep_time)
-
             if self.frame is not None:
+                self.frames += 1
+
+                if time.time() - self.start >= 1:
+                    print("FPS:", self.frames)
+                    self.frames = 0
+                    self.start = time.time()
                 cv2.imshow(self.windowName, self.frame)
 
             # STOP SAVING
@@ -224,11 +253,13 @@ class VideoCapture(Loger):
     def cross(self):
         if  len(self.rcMouse.oldLocation)==2:
             x,y = self.rcMouse.oldLocation
+            x,y = int(x//0.5), int(y//0.5)
             cv2.line(self.frame, (x-10, y), (x+10, y), (255, 0, 0), 1)
             cv2.line(self.frame, (x, y-10), (x, y+10), (255, 0, 0), 1)
 
         if  len(self.rcCarriage.oldLocation)==2:
             x,y = self.rcCarriage.oldLocation
+            x,y = int(x//0.5), int(y//0.5)
             cv2.line(self.frame, (x-10, y), (x+10, y), (0, 255, 0), 1)
             cv2.line(self.frame, (x, y-10), (x, y+10), (0, 255, 0), 1)
 

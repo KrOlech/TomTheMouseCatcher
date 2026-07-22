@@ -56,6 +56,7 @@ class Recognize(Recognize_Abstract):
     def __maskTheImage(self, img_RGB):
 
         if self.ogDifferents:
+            #dif_RGB = cv2.absdiff(img_RGB, self.ref_image)
             dif_RGB = img_RGB -self.ref_image
         else:
             dif_RGB = img_RGB
@@ -78,7 +79,7 @@ class Recognize(Recognize_Abstract):
     @staticmethod
     def __combine(image,underPlexy):
 
-        x0, x1, y0, y1 = 190, 1080, 910, 1460
+        x0, x1, y0, y1 = int(190*0.5), int(1080*0.5), int(910*0.5), int(1460*0.5)
 
         partOfImage = image[x0:x1,y0:y1]
         partUnderPlexy = underPlexy[x0:x1,y0:y1]
@@ -89,7 +90,7 @@ class Recognize(Recognize_Abstract):
 
     @staticmethod
     def __blure(img):
-        blur = cv2.GaussianBlur(img, (0, 0), sigmaX=33, sigmaY=33)
+        blur = cv2.GaussianBlur(img, (0, 0), sigmaX=11, sigmaY=1)
 
         # divide
         divide = cv2.divide(img, blur, scale=255)
@@ -179,7 +180,7 @@ class Recognize(Recognize_Abstract):
         self.speed = np.hypot(self.vx, self.vy)
         self.accel = np.hypot(self.ax, self.ay)
 
-        return self.px,self.py
+        return self.px ,self.py
 
     @staticmethod
     def __adaptive_alpha_beta(innovation):
