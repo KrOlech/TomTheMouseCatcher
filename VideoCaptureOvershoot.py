@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from datetime import datetime
@@ -67,10 +68,10 @@ class VideoCapture(Loger):
             np.array([85, 85, 150]),
             np.array([100, 150, 220]),
         ]
-        #mousePlexyMask = [
-        #    np.array([0, 0, 210]),
-        #    np.array([110, 25, 250]),
-        #]
+        mousePlexyMask = [
+            np.array([0, 0, 210]),
+            np.array([110, 25, 250]),
+        ]
         mouseArea = [
             int(400 * 0.25),
             int(5500 * 0.25),
@@ -81,48 +82,21 @@ class VideoCapture(Loger):
             mouseMainMask,
             mouseArea,
             mouseAspect,
-           # mousePlexyMask,
+            mousePlexyMask,
         )
 
-        # The carriage is hidden briefly below the central commutator.
-        # Coordinates below use the half-resolution processing image.
-        #
-        # Full-image occlusion corridor:
-        # approximately X=800..1130
-        #
-        # Processing-image corridor:
-        # X=400..565
         self.rcCarriage = HorizontalCarriageTracker(
             template_width=32,
             template_height=26,
             search_margin_y=16,
-
-            local_search_radius=180,
+            local_search_radius=170,
             maximum_step=70,
-            smoothing=0.72,
-            minimum_match=0.28,
+            smoothing=0.78,
+            minimum_match=0.30,
             strong_match=0.58,
             template_update_rate=0.0,
-            recovery_growth=0,
-            maximum_recovery_radius=180,
-
-            occlusion_left_x=400,
-            occlusion_right_x=565,
-            occlusion_entry_margin=18,
-            occlusion_exit_margin=22,
-
-            maximum_occlusion_frames=40,
-            reacquire_grace_frames=12,
-            reacquire_search_radius=220,
-            reacquire_minimum_match=0.24,
-
-            creep_prediction_step=2.5,
-            medium_prediction_step=5.0,
-            fast_prediction_step=9.0,
-
-            velocity_alpha=0.55,
-            minimum_prediction_step=1.5,
-            maximum_prediction_step=18.0,
+            recovery_growth=45,
+            maximum_recovery_radius=420,
         )
 
         self.recTrigger = recTrigger
@@ -138,9 +112,13 @@ class VideoCapture(Loger):
         self.motor_status = "INITIALIZING"
         self.automatic_motor = None
 
-        # Fixed-pixel version: every left click initializes the carriage.
-        # motor_limits.json and click-calibrated speed zones are not used.
+        # Press [ and click to set the LEFT safe boundary.
+        # Press ] and click to set the RIGHT safe boundary.
         self.limit_click_mode = None
+        self.motor_limits_path = os.path.join(
+            os.path.dirname(__file__),
+            "motor_limits.json",
+        )
 
         self.fourcc = cv2.VideoWriter_fourcc(*"XVID")
 
@@ -156,203 +134,271 @@ class VideoCapture(Loger):
 
         self.setCapture()
 
-        # --------------------------------------------------------------
-        # SIMPLE TWO-SPEED END PROTECTION
-        # --------------------------------------------------------------
-        # All values use FULL-resolution camera X coordinates.
-        #
-        # Visible red STOP coordinates. Keep them safely inside the
-        # physical end switches.
-        fixed_left_stop_full_px = 20.0
-        fixed_right_stop_full_px = 1900.0
+        processed_width = Settings.FrameWidth * 0.5
 
-        # Hidden slowdown boundaries. The motor changes from FAST to CREEP
-        # before it reaches either visible red STOP line.
-        slow_left_full_px = 500.0
-        slow_right_full_px = 1400.0
+        # Conservative defaults based on the rail occupying the central part
+        # of the camera image. Calibrate exact boundaries with [ and ].
+        default_left_safe = processed_width * 0.15
+        default_right_safe = processed_width * 0.85
 
-        print(
-            "Pre-slow/red-stop mode: "
-            f"red STOP={fixed_left_stop_full_px:.1f}.."
-            f"{fixed_right_stop_full_px:.1f}; "
-            f"hidden CREEP={slow_left_full_px:.1f}.."
-            f"{slow_right_full_px:.1f} full-frame px"
+        left_safe, right_safe = self.load_motor_limits(
+            default_left_safe,
+            default_right_safe,
         )
 
         self.automatic_motor = AutomaticMotorControl(
             finish_flag=self.finishFlag,
             port="COM3",
             baudrate=115200,
+            deadband=35.0,
 
-            # Responsive positioning: no SETTLING delay.
-            deadband=16.0,
-            movement_start_deadband_px=28.0,
-            movement_stop_deadband_px=16.0,
-            reverse_deadband_px=55.0,
-            settle_time_s=0.0,
-            target_filter_alpha=0.50,
-            target_filter_snap_px=16.0,
+            # The raw image range is replaced immediately by calibrated
+            # limits below.
+            left_limit=left_safe,
+            right_limit=right_safe,
+            end_guard_px=0.0,
 
-            # Carriage tracker coordinates are half-resolution.
-            processing_to_full_scale=2.0,
+            # Maximum speed remains enabled in the central section.
+            fast_distance_px=140.0,
+            medium_distance_px=65.0,
 
-            # Visible red software STOP coordinates.
-            fixed_left_stop_full_px=fixed_left_stop_full_px,
-            fixed_right_stop_full_px=fixed_right_stop_full_px,
+            # Full speed remains available in the centre, but braking starts
+            # much earlier when moving toward a physical end.
+            end_creep_zone_px=95.0,
+            end_medium_zone_px=190.0,
+            end_prediction_s=0.60,
 
-            # Hidden boundaries where FAST changes to CREEP.
-            slow_left_full_px=slow_left_full_px,
-            slow_right_full_px=slow_right_full_px,
-
-            # Stop slightly before the tracked centre reaches the red line.
-            stop_trigger_margin_full_px=25.0,
-
-            # After a hard stop, outward movement stays blocked until the
-            # carriage has moved back toward the centre.
-            fixed_release_margin_full_px=80.0,
-
-            # Corrected mouse targets may approach close to each hard line.
-            target_margin_full_px=30.0,
-
+            # Safety prediction uses the raw, unsmoothed carriage position and
+            # a worst-case speed floor, so it still works when the green
+            # tracking cross lags behind at high speed.
+            safety_prediction_s=0.35,
+            emergency_stop_margin_px=35.0,
+            carriage_half_width_px=16.0,
+            nominal_creep_speed_px_s=80.0,
+            nominal_medium_speed_px_s=170.0,
+            nominal_fast_speed_px_s=330.0,
             heartbeat_interval_s=0.05,
-            mouse_hold_s=0.40,
 
-            # Stop immediately during a miss, but allow automatic local
-            # reacquisition before requiring another carriage click.
-            tracking_loss_frames_to_latch=30,
-
-            # Perspective correction: carriage is placed ahead of the mouse
-            # toward the left or right end of the eMaze.
             maze_length_mm=1500.0,
-            maximum_perspective_offset_mm=180.0,
+            maximum_perspective_offset_mm=150.0,
+        )
+
+        self.automatic_motor.configure_safe_limits(
+            left_safe_px=left_safe,
+            right_safe_px=right_safe,
         )
 
         self.motor_status = "WAITING FOR CLICK"
 
         self.runCaptureTryExcept()
 
-    def draw_fixed_pixel_safety(self):
-        """Draw only the two visible red STOP boundaries."""
-        if self.frame is None or self.automatic_motor is None:
-            return
+    def load_motor_limits(
+        self,
+        default_left: float,
+        default_right: float,
+    ) -> tuple[float, float]:
+        try:
+            with open(
+                self.motor_limits_path,
+                "r",
+                encoding="utf-8",
+            ) as file:
+                data = json.load(file)
 
-        frame_height, frame_width = self.frame.shape[:2]
+            left = float(data["left_safe_px"])
+            right = float(data["right_safe_px"])
 
-        for x_position in (
-            int(round(
-                self.automatic_motor.fixed_left_stop_full_px
-            )),
-            int(round(
-                self.automatic_motor.fixed_right_stop_full_px
-            )),
-        ):
-            if 0 <= x_position < frame_width:
-                cv2.line(
-                    self.frame,
-                    (x_position, 0),
-                    (x_position, frame_height),
-                    (0, 0, 255),
-                    4,
+            if right - left < 150.0:
+                raise ValueError(
+                    "Stored limits are too close together."
                 )
 
-    def draw_perspective_diagnostics(self):
-        """Show raw mouse, corrected target, and raw carriage positions."""
-        if self.frame is None or self.automatic_motor is None:
+            print(
+                "Loaded motor limits: "
+                f"{left:.1f} .. {right:.1f}"
+            )
+            return left, right
+
+        except (
+            OSError,
+            KeyError,
+            TypeError,
+            ValueError,
+            json.JSONDecodeError,
+        ) as error:
+            print(
+                "Using conservative default motor limits "
+                f"({error})."
+            )
+            return float(default_left), float(default_right)
+
+    def save_motor_limits(self) -> None:
+        if self.automatic_motor is None:
             return
 
-        frame_height, frame_width = self.frame.shape[:2]
+        data = {
+            "left_safe_px": (
+                self.automatic_motor.safe_left_px
+            ),
+            "right_safe_px": (
+                self.automatic_motor.safe_right_px
+            ),
+        }
+
+        with open(
+            self.motor_limits_path,
+            "w",
+            encoding="utf-8",
+        ) as file:
+            json.dump(data, file, indent=2)
+
+        print(
+            "Saved motor limits to "
+            f"{self.motor_limits_path}"
+        )
+
+    def draw_motor_speed_zones(self) -> None:
+        if (
+            self.automatic_motor is None
+            or self.frame is None
+        ):
+            return
+
+        zones = self.automatic_motor.get_speed_zones()
         scale_to_full = 2.0
+        frame_height, frame_width = self.frame.shape[:2]
 
-        raw_mouse_full = (
-            self.automatic_motor.raw_mouse_x
-            * scale_to_full
+        def full_x(value: float) -> int:
+            return max(
+                0,
+                min(
+                    frame_width - 1,
+                    int(round(value * scale_to_full)),
+                ),
+            )
+
+        safe_left = full_x(zones["safe_left"])
+        left_creep_end = full_x(
+            zones["left_creep_end"]
         )
-        corrected_target_full = (
-            self.automatic_motor.corrected_target_x
-            * scale_to_full
+        left_medium_end = full_x(
+            zones["left_medium_end"]
         )
-        carriage_raw_full = (
-            self.automatic_motor.raw_carriage_x
-            * scale_to_full
+        right_medium_start = full_x(
+            zones["right_medium_start"]
         )
-        offset_full = (
-            self.automatic_motor.perspective_offset_px
-            * scale_to_full
+        right_creep_start = full_x(
+            zones["right_creep_start"]
+        )
+        safe_right = full_x(zones["safe_right"])
+
+        overlay = self.frame.copy()
+
+        # Red = forbidden; orange = creep; yellow = medium.
+        cv2.rectangle(
+            overlay,
+            (0, 0),
+            (safe_left, frame_height),
+            (0, 0, 255),
+            -1,
+        )
+        cv2.rectangle(
+            overlay,
+            (safe_right, 0),
+            (frame_width, frame_height),
+            (0, 0, 255),
+            -1,
+        )
+        cv2.rectangle(
+            overlay,
+            (safe_left, 0),
+            (left_creep_end, frame_height),
+            (0, 120, 255),
+            -1,
+        )
+        cv2.rectangle(
+            overlay,
+            (right_creep_start, 0),
+            (safe_right, frame_height),
+            (0, 120, 255),
+            -1,
+        )
+        cv2.rectangle(
+            overlay,
+            (left_creep_end, 0),
+            (left_medium_end, frame_height),
+            (0, 255, 255),
+            -1,
+        )
+        cv2.rectangle(
+            overlay,
+            (right_medium_start, 0),
+            (right_creep_start, frame_height),
+            (0, 255, 255),
+            -1,
         )
 
-        def draw_vertical(
-            x_value: float,
-            colour: tuple[int, int, int],
-            label: str,
-            y_text: int,
-        ) -> None:
-            x = int(round(x_value))
+        self.frame = cv2.addWeighted(
+            overlay,
+            0.10,
+            self.frame,
+            0.90,
+            0.0,
+        )
 
-            if not 0 <= x < frame_width:
-                return
+        line_data = [
+            (safe_left, (0, 0, 255), "STOP"),
+            (
+                left_creep_end,
+                (0, 120, 255),
+                "CREEP",
+            ),
+            (
+                left_medium_end,
+                (0, 255, 255),
+                "MEDIUM",
+            ),
+            (
+                right_medium_start,
+                (0, 255, 255),
+                "MEDIUM",
+            ),
+            (
+                right_creep_start,
+                (0, 120, 255),
+                "CREEP",
+            ),
+            (safe_right, (0, 0, 255), "STOP"),
+        ]
 
+        for x_position, colour, label in line_data:
             cv2.line(
                 self.frame,
-                (x, 0),
-                (x, frame_height),
+                (x_position, 0),
+                (x_position, frame_height),
                 colour,
                 2,
             )
             cv2.putText(
                 self.frame,
                 label,
-                (max(2, x - 45), y_text),
+                (
+                    max(2, x_position - 25),
+                    105,
+                ),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.48,
+                0.45,
                 colour,
                 1,
                 cv2.LINE_AA,
             )
 
-        # Yellow: detected mouse.
-        draw_vertical(
-            raw_mouse_full,
-            (0, 255, 255),
-            "MOUSE",
-            200,
-        )
-
-        # Cyan: perspective-corrected carriage target.
-        draw_vertical(
-            corrected_target_full,
-            (255, 255, 0),
-            "TARGET",
-            225,
-        )
-
-        # Magenta: newest unsmoothed carriage position.
-        draw_vertical(
-            carriage_raw_full,
-            (255, 0, 255),
-            "CARRIAGE",
-            250,
-        )
-
-        relation = (
-            "TARGET LEFT OF MOUSE"
-            if corrected_target_full < raw_mouse_full
-            else
-            "TARGET RIGHT OF MOUSE"
-            if corrected_target_full > raw_mouse_full
-            else
-            "TARGET = MOUSE"
-        )
-
         cv2.putText(
             self.frame,
-            (
-                f"MOUSE={raw_mouse_full:.1f}  "
-                f"TARGET={corrected_target_full:.1f}  "
-                f"CARRIAGE={carriage_raw_full:.1f}  "
-                f"OFFSET={offset_full:+.1f}px  "
-                f"{relation}"
-            ),
-            (250, 195),
+            "[ + click: LEFT safe line   "
+            "] + click: RIGHT safe line   "
+            "MAGENTA=raw safety X  CYAN=predicted X",
+            (310, 95),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.52,
             (255, 255, 255),
@@ -368,7 +414,7 @@ class VideoCapture(Loger):
         flags,
         param,
     ):
-        """Capture or re-capture the carriage template."""
+        """Set safe boundaries or capture/re-capture the carriage."""
         del flags, param
 
         if event != cv2.EVENT_LBUTTONDOWN:
@@ -383,9 +429,35 @@ class VideoCapture(Loger):
         processing_x = int(x * processing_scale)
         processing_y = int(y * processing_scale)
 
-        # Fixed-only mode: every click initializes or re-initializes
-        # the real carriage position.
-        self.limit_click_mode = None
+        if (
+            self.limit_click_mode is not None
+            and self.automatic_motor is not None
+        ):
+            left = self.automatic_motor.safe_left_px
+            right = self.automatic_motor.safe_right_px
+
+            if self.limit_click_mode == "left":
+                left = float(processing_x)
+            else:
+                right = float(processing_x)
+
+            try:
+                self.automatic_motor.configure_safe_limits(
+                    left_safe_px=left,
+                    right_safe_px=right,
+                )
+                self.save_motor_limits()
+                self.motor_status = (
+                    f"{self.limit_click_mode.upper()} "
+                    "SAFE LIMIT SAVED"
+                )
+            except ValueError as error:
+                self.motor_status = str(error)
+                print(error)
+            finally:
+                self.limit_click_mode = None
+
+            return
 
         try:
             self.rcCarriage.initialize_from_click(
@@ -531,25 +603,8 @@ class VideoCapture(Loger):
                     mouse_location
                 )
 
-                current_motor_command = 0
-
-                if self.automatic_motor is not None:
-                    current_motor_command = int(
-                        getattr(
-                            self.automatic_motor,
-                            "_desired_command",
-                            0,
-                        )
-                    )
-
-                # Arduino command polarity is mirrored relative to image X:
-                # positive Arduino command moves image-left, while the
-                # tracker expects positive direction to mean image-right.
-                tracker_image_command = -current_motor_command
-
                 self.rcCarriage.get_location(
-                    self.frame_lum,
-                    motor_command=tracker_image_command,
+                    self.frame_lum
                 )
 
                 if self.automatic_motor is not None:
@@ -582,9 +637,6 @@ class VideoCapture(Loger):
                 if self.automatic_motor is not None:
                     self.automatic_motor.stop()
                     self.motor_status = "CALIBRATING"
-
-            # Keep only the two red motor stop lines on the video.
-            self.draw_fixed_pixel_safety()
 
             requires_click = (
                 self.automatic_motor is not None
@@ -651,6 +703,7 @@ class VideoCapture(Loger):
                 cv2.LINE_AA,
             )
 
+            self.draw_motor_speed_zones()
 
             self.zone_active_last = self.zone_active
 
@@ -702,6 +755,43 @@ class VideoCapture(Loger):
                     -1,
                 )
 
+                # Magenta vertical tick = newest unsmoothed carriage match
+                # used by the safety controller. At high speed it may lead the
+                # green smoothed cross; this is expected and prevents late
+                # braking at the red line.
+                raw_x = int(
+                    getattr(
+                        self.rcCarriage,
+                        "raw_px",
+                        self.rcCarriage.px,
+                    )
+                    // 0.5
+                )
+                raw_y = int(
+                    self.rcCarriage.py // 0.5
+                )
+
+                cv2.line(
+                    self.frame,
+                    (raw_x, raw_y - 14),
+                    (raw_x, raw_y + 14),
+                    (255, 0, 255),
+                    2,
+                )
+
+                if self.automatic_motor is not None:
+                    predicted_x = int(
+                        self.automatic_motor.predicted_carriage_x
+                        // 0.5
+                    )
+                    cv2.line(
+                        self.frame,
+                        (predicted_x, raw_y - 10),
+                        (predicted_x, raw_y + 10),
+                        (255, 255, 0),
+                        2,
+                    )
+
             if (
                 self.saving_started
                 and self.out is not None
@@ -747,12 +837,21 @@ class VideoCapture(Loger):
 
             key = cv2.waitKey(1) & 0xFF
 
-            if key == ord("[") or key == ord("]"):
-                print(
-                    "Speed zones are removed. Change "
-                    "fixed_left_stop_full_px and "
-                    "fixed_right_stop_full_px in VideoCapture.py."
+            if key == ord("["):
+                self.limit_click_mode = "left"
+                self.motor_status = (
+                    "CLICK LEFT SAFE LIMIT"
                 )
+                if self.automatic_motor is not None:
+                    self.automatic_motor.stop(force=True)
+
+            elif key == ord("]"):
+                self.limit_click_mode = "right"
+                self.motor_status = (
+                    "CLICK RIGHT SAFE LIMIT"
+                )
+                if self.automatic_motor is not None:
+                    self.automatic_motor.stop(force=True)
 
             elif key == ord("s"):
                 if self.automatic_motor is not None:

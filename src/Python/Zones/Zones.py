@@ -6,8 +6,8 @@ from datetime import datetime
 
 from src.Python.Loger.Loger import Loger
 from src.Python.Settings import Settings
-from src.Python.MainLoop.MainLoop import MainLoop
-
+#from src.Python.MainLoop.MainLoop import MainLoop
+from src.Python.MainLoop.MainLoopSelector import MainLoop    #07.08.06 Tomasz
 
 
 class Zones(Loger):

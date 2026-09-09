@@ -16,7 +16,7 @@ CamNr = 0
 
 fps = 20
 
-minDiffPix = 500  # minimal number of thresholded pixels to recognize the mouse
+minDiffPix = 300  # minimal number of thresholded pixels to recognize the mouse
 threshold = 40  # relative threshold used to segment the mouse
 lightFlash = False  # decision whether light flashes or not
 lightFlash_step = 0  # how fast light flashes (s)
@@ -26,20 +26,20 @@ lightFlashEXC = [1, 2, 3, 4]  # number of lights that should not be flashing
 
 # Coordintaes nearest light;
 zones = {}
-zones["A"] = [105, 456, 207, 176]
-zones["B"] = [343, 445, 592, 196]
-zones["C"] = [954, 442, 544, 196]
-zones["D"] = [1510, 456, 352, 168]
-zones["E1"] = [1671, 663, 217, 72]
-zones["E2"] = [1663, 345, 226, 72]
-zones["F1"] = [1284, 660, 277, 176]
-zones["F2"] = [1284, 238, 277, 176]
-zones["G1"] = [586, 660, 664, 184]
-zones["G2"] = [592, 236, 668, 182]
-zones["H1"] = [120, 670, 431, 162]
-zones["H2"] = [120, 240, 431, 162]
-zones["S1"] = [1672, 740, 70, 89]
-zones["S2"] = [1672, 247, 70, 89]
+zones["A"] = [237, 469, 158, 143]
+zones["B"] = [413, 470, 543, 151]
+zones["C"] = [966, 471, 474, 157]
+zones["D"] = [1456, 477, 205, 138]
+zones["E1"] = [1496, 644, 163, 41]
+zones["E2"] = [1499, 399, 163, 48]
+zones["F1"] = [1284, 650, 128, 126]
+zones["F2"] = [1280, 313, 128, 128]
+zones["G1"] = [567, 650, 708, 126]
+zones["G2"] = [564, 313, 707, 128]
+zones["H1"] = [241, 650, 312, 126]
+zones["H2"] = [245, 313, 310, 128]
+zones["S1"] = [1496, 689, 73, 78]
+zones["S2"] = [1499, 324, 72, 71]
 # zones["S1"]=[1672,779,39,46]
 # zones["S2"]=[1666,233,39,46]
 
@@ -136,8 +136,10 @@ soundFile2 = "C:\\Users\\kradwanska\\Desktop1\\14k_hz.wav"
 volume1 = 0#0.28183829312644537
 volume2 = 0#0.12589254117941673
 
+MainLoopMode = "HABITUATION1"  # Tomasz 07.08.2026
+
 # Trial numbers flag
-MaxTrials = 50
+MaxTrials = 50#
 
 # Trial sequence flag
 # To randomize the list enter Spyder4 interface and copy the last line of result of code provided below:
@@ -150,8 +152,7 @@ MaxTrials = 50
 
 # Forced Choices - 30 trials:
 
-LogicList = [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1,
-             0]  # - Randomized 1
+# LogicList = [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1,0]  # - Randomized 1
 # LogicList = [0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1] #- Randomized 2
 # LogicList = [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0] #- Randomized 3
 # LogicList = [1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1] #- Randomized 4

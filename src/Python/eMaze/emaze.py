@@ -13,17 +13,34 @@ class EMaze(EMazeNoDoors):
         self.logStart()
         super(EMaze, self).__init__()
 
-        self.door_status = multiprocessing.Array('i', numpy.zeros(self.nr_of_doors, dtype=numpy.uint))
-        self.light_status = multiprocessing.Array('i', numpy.zeros(4, dtype=numpy.uint))
+        self.door_status = multiprocessing.Array(
+            'i', numpy.zeros(self.nr_of_doors, dtype=numpy.uint)
+        )
+        self.light_status = multiprocessing.Array(
+            'i', numpy.zeros(4, dtype=numpy.uint)
+        )
 
-        self.dc = multiprocessing.Process(target=DoorControl,
-                                          args=(self.door_status, self.light_status, self.finishFlag,))
-
+        self.dc = multiprocessing.Process(
+            target=DoorControl,
+            args=(self.door_status, self.light_status, self.finishFlag,),
+            name="DoorControl",
+        )
 
     def run(self):
+        # VideoCapture owns COM3 through AutomaticMotorControl.
         self.p.start()
         self.dc.start()
-        self.mainLoop()
+
+        try:
+            self.mainLoop()
+        finally:
+            self.finishFlag.set()
+
+            for process in (self.p, self.dc):
+                process.join(timeout=3)
+                if process.is_alive():
+                    process.terminate()
+                    process.join(timeout=1)
 
     def _getDoorIndex(self, door_name):
         return DoorControl.getDoorIndex(door_name, self.door_names)
@@ -46,6 +63,7 @@ class EMaze(EMazeNoDoors):
 
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     Setup().setUp()
     eMaze = EMaze()
     eMaze.run()

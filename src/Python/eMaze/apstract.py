@@ -2,7 +2,8 @@ import multiprocessing
 from abc import abstractmethod
 
 from src.Python.Doors.DoorControl import DoorControl
-from src.Python.MainLoop.MainLoop import MainLoop  # Line to choose the logic: from (insert logic name) import MainLoop
+#from src.Python.MainLoop.MainLoop import MainLoop  # Line to choose the logic: from (insert logic name) import MainLoop
+from src.Python.MainLoop.MainLoopSelector import MainLoop  # Tomasz 07.08.2026
 from src.Python.Settings import Settings
 from src.Python.Zones.Zones import Zones
 

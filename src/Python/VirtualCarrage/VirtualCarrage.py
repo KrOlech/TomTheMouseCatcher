@@ -1,142 +1,34 @@
-import time
+"""Legacy carriage-position helper.
 
-import serial
+Automatic motor control has deliberately been removed. COM3 is now owned only
+by KeyboardMotorControl.py, so this class must never open the serial port.
+"""
 
-from src.Python.Settings import Settings
 from src.Python.Loger.Loger import Loger
 
 
 class VirtualCarrage(Loger):
     position: int = 100
-
-    OneFullRotation_Steps:int = 200
-
-    Gear_1_cog_count:int = 120
-    Gear_2_cog_count:int = 20
-
-    Gear_dif: float = Gear_1_cog_count / Gear_2_cog_count
-
-    angleDelta: float=360/OneFullRotation_Steps
-
-    belt_peach = 2 # mm
-
-    Gear_1_length = belt_peach*Gear_1_cog_count
-    Gear_2_length = belt_peach*Gear_2_cog_count
-
-    oneSteplength = Gear_1_length/OneFullRotation_Steps
-
-    timeGoing_left = 0
-    timeGoing_right = 0
-
-    positionMM = 10
-
-    safetyDistance = 20 #mm
-
-    SPEED_STEPS: int = 325 # ps/s
-    SPEED_STEPS_left: int = -SPEED_STEPS
-    SPEED_STEPS_right: int = SPEED_STEPS
-    SPEED: int = SPEED_STEPS*oneSteplength  # m/s
-
-    MAZE_LENGTH: float = 1.5  # mm
-    MAZE_LENGTH_MM: float = 1.5*1000  # mm
-
-    MAZE_LENGTH_PIZELS: int = 1920
-
-    SPEED_PIXELS: int = int(MAZE_LENGTH_PIZELS * SPEED / MAZE_LENGTH_MM)
-    last_status = ""
-
-    timeGoing_ = 0
+    positionMM: float = 10.0
 
     def __init__(self):
-        if Settings.arduinoLineCome:
-            self.arduino = serial.Serial(port=Settings.arduinoLineCome, baudrate=Settings.baudrate, timeout=.1)
-
-
-    #def advanceZoneCords(self,zoneCords, ):
-    #    x0, y0, w, h = zoneCords
-
-    #    self.advance(x0)
-
-    def __movementInDirection(self, direction):
-        if self.last_status != direction:
-            if self.last_status in ["left", "right"]:
-                timeDelta = time.time() - self.__getattribute__('timeGoing_' + self.last_status)
-                self.loger(f"virtual carriage was going for {timeDelta} in {self.last_status}")
-            self.last_status = direction
-            self.loger(f"moving virtual carriage to the {direction}")
-            self.__getattribute__(direction)()
-            self.__setattr__('timeGoing_'+direction, time.time())
-
-        else:
-            timeDelta = time.time() - self.__getattribute__('timeGoing_'+direction)
-            self.__setattr__('timeGoing_'+direction, time.time())
-            stepsDone = self.__getattribute__('SPEED_STEPS_'+direction) * timeDelta
-            self.positionMM += self.oneSteplength * stepsDone
-            if self.positionMM > self.MAZE_LENGTH_MM - self.safetyDistance or self.positionMM < self.safetyDistance:
-                self.stop()
-
+        self.last_status = "manual"
 
     def advance(self, x0, c0):
-
-        x0 = int(x0/0.5)
-        c0 = int(c0/0.5)
-
-        x = c0-(1920/2)
-        xn = x/(1920/2)
-
-        px_delta = 300
-
-        c0 =int(c0 - xn*px_delta)
-
-        tolerance = 50
-
-        #self.loger(f"calculated position is: {self.position} detected position is {c0} delta of them is {self.position - c0} ")
-        #self.loger(f"calculated mouse position is: {x0} delta to carriage position is {x0 - c0} ")
-
-        if c0 < x0 - tolerance:
-            # right
-            self.__movementInDirection("right")
-
-
-        elif c0 > x0 + tolerance:
-            # left
-            self.__movementInDirection("left")
-
-        else:
-            # stop
-            if self.last_status != "stop":
-                self.stop()
-
-        self.position = c0 #int(self.positionMM*self.MAZE_LENGTH_PIZELS/self.MAZE_LENGTH_MM)
+        """Update only the displayed carriage position; do not drive the motor."""
+        del x0
+        self.position = int(c0 / 0.5)
 
     def stop(self):
-        lstemp = self.last_status
-        self.last_status = "stop"
-        self.loger("Stoping virtual carriage")
-        self.__arduinoStop()
-        timeDelta = time.time() - self.__getattribute__('timeGoing_' + lstemp)
-        self.loger(f"virtual carriage was going for {timeDelta} in {lstemp}")
-
-    def __arduinoStop(self):
-        self.__arduinoComand("100","stop")
-
-    def right(self):
-        self.__arduinoComand("1","right")
+        """Kept for compatibility; motor STOP belongs to KeyboardMotorControl."""
+        self.last_status = "manual"
 
     def left(self):
-        self.__arduinoComand("-1","left")
+        raise RuntimeError(
+            "Automatic motor control is disabled. Use KeyboardMotorControl."
+        )
 
-    def __arduinoComand(self, comand, comandName):
-        if Settings.arduinoLineCome:
-            self.loger(f"sending {comandName} commend to Arduino")
-            self.arduino.write(bytes(comand, 'utf-8'))
-            arduinoAck = self.arduino.readline().decode("utf-8")
-            self.loger(f"Arduino ack: {arduinoAck}")
-            if 'end' in arduinoAck:
-                self.last_status = "stop"
-                if 'left' in arduinoAck:
-                    self.positionMM = self.safetyDistance
-                else:
-                    self.positionMM = self.MAZE_LENGTH_MM - self.safetyDistance
-
-
+    def right(self):
+        raise RuntimeError(
+            "Automatic motor control is disabled. Use KeyboardMotorControl."
+        )
